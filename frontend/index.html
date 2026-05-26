@@ -297,6 +297,33 @@
       font-size: 13px;
     }
 
+    .public-note {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background: var(--muted-panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .security-warning {
+      grid-column: 1 / -1;
+      padding: 12px;
+      background: var(--high-bg);
+      border: 1px solid #E9B8B8;
+      border-radius: 8px;
+      color: var(--high-text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .upload-beta-action {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-start;
+    }
+
     input[type="file"] {
       width: 100%;
       min-width: 0;
@@ -694,6 +721,11 @@
           <h2>Run a finance QA check</h2>
           <p>Upload an .xlsx workbook to generate a risk score, issue list, and checked Excel output.</p>
           <p class="upload-note">For public testing, use sample or anonymized workbooks.</p>
+        </div>
+        <div class="public-note">Public page note: file upload works only in local/private demo mode when the backend is running. For hosted beta access, request an invite.</div>
+        <div class="security-warning">Do not upload confidential workbooks to any public demo environment.</div>
+        <div class="upload-beta-action">
+          <a class="button-link secondary" href="mailto:max.lopatin.lanskoy@gmail.com?subject=Finance%20Report%20Checker%20Beta">Request beta access</a>
         </div>
         <input id="fileInput" type="file" accept=".xlsx">
         <button id="analyzeButton" type="button">Analyze</button>
