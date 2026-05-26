@@ -4,6 +4,16 @@ Finance Report Checker is a local MVP for reviewing Excel finance reports. It an
 
 The current version runs locally and uses deterministic rules. It does not send files to any external service.
 
+## Product Positioning
+
+Finance Report Checker is a pre-send QA tool for Excel-based finance reports.
+
+It is designed for FP&A analysts, finance managers, controllers, CFOs, and consultants who prepare or review Excel-based reporting packs.
+
+Finance professionals often spend time manually checking Excel reports and still risk sending files with broken formulas, manual overrides, missing values, or incorrect totals.
+
+Current pitch: Upload your workbook, run finance QA checks, and download an annotated Excel file with highlighted issues, comments, and a QA_Report sheet.
+
 ## Current MVP Features
 
 - Command-line analyzer through `analyzer.py`
