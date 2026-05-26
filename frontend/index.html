@@ -110,6 +110,13 @@
       font-size: 16px;
     }
 
+    .checks-line {
+      margin: 16px 0 0;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
     .hero-actions {
       display: flex;
       flex-wrap: wrap;
@@ -254,8 +261,54 @@
       margin-bottom: 4px;
     }
 
+    .preview-issue p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .preview-output {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--low-bg);
+      border: 1px solid #B7D8C1;
+      border-radius: 8px;
+      color: var(--low-text);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
     section {
       margin-top: 24px;
+    }
+
+    .compact-strip {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 18px;
+    }
+
+    .strip-card {
+      padding: 14px 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .strip-card strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--navy);
+      font-size: 15px;
+    }
+
+    .inactive-upload-note {
+      background: var(--sand);
+      border-color: #D7C7AD;
     }
 
     .section-header {
@@ -658,6 +711,7 @@
       .pill-row,
       .compact-grid,
       .output-grid,
+      .compact-strip,
       .results-summary {
         grid-template-columns: 1fr;
       }
@@ -681,15 +735,16 @@
         <span class="eyebrow">Local MVP</span>
         <h1>Finance Report Checker</h1>
         <p class="subtitle">Pre-send QA for Excel-based finance reports.</p>
-        <p class="description">Detect broken formulas, hardcoded values, blank cells, unusual variances, and total/subtotal mismatches before the report reaches management.</p>
+        <p class="description">Find spreadsheet issues before the report reaches management.</p>
+        <p class="checks-line">Formula errors · Hardcodes · Blank cells · Variance spikes · Total mismatches</p>
         <div class="hero-actions">
-          <a class="button-link primary" href="#local-demo">Run local demo</a>
-          <a class="button-link secondary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
+          <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
+          <a class="button-link secondary" href="#sample-result">View sample result</a>
         </div>
-        <p class="microcopy">Local demo: files are processed on your machine while running the app locally.</p>
+        <p class="microcopy">Local/private demo only. Do not upload confidential workbooks to public demo environments.</p>
       </div>
 
-      <aside class="preview-card" aria-label="Sample QA result">
+      <aside id="sample-result" class="preview-card" aria-label="Sample QA result">
         <div class="preview-header">
           <h2>Sample QA result</h2>
           <span class="badge high">High</span>
@@ -718,110 +773,28 @@
           <strong>Total formula may omit detail rows</strong>
           <p>OPEX Detail · F9 · May</p>
         </div>
+        <div class="preview-output">Checked Excel with highlighted cells, comments, and QA_Report</div>
       </aside>
     </header>
 
-    <section id="local-demo">
-      <div class="upload-panel panel">
-        <div class="upload-copy">
-          <span class="eyebrow">Local demo</span>
-          <h2>Run a finance QA check</h2>
-          <p>In local/private demo mode, upload an .xlsx workbook to generate a risk score, issue list, and checked Excel output.</p>
-          <p class="upload-note">Local demo: files are processed on your machine while running the app locally.</p>
-        </div>
-        <div class="public-note">Public landing mode: file upload is available only in local/private demo when the backend is running.</div>
-        <div class="security-warning">For testing access, request private beta instead of uploading confidential files here.</div>
-        <div class="upload-beta-action">
-          <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
-        </div>
-        <input id="fileInput" type="file" accept=".xlsx" disabled>
-        <button id="analyzeButton" type="button" disabled>Analyze</button>
+    <section class="compact-strip" aria-label="Product context">
+      <div class="strip-card">
+        <strong>Built for finance review workflows</strong>
+        Built for FP&amp;A analysts, finance managers, controllers, CFOs, and finance consultants.
+      </div>
+      <div class="strip-card inactive-upload-note">
+        <strong>Landing / waitlist mode</strong>
+        Current public page is a landing/waitlist. File analysis is available in local/private beta. Upload analysis is available in local/private beta.
       </div>
     </section>
 
-    <section>
-      <div class="section-header">
-        <h2>Checks included</h2>
-      </div>
-      <div class="pill-row">
-        <div class="pill">Formula inconsistencies</div>
-        <div class="pill">Hardcoded values</div>
-        <div class="pill">Blank cells</div>
-        <div class="pill">Variance spikes</div>
-        <div class="pill">Total/subtotal mismatches</div>
-      </div>
-    </section>
+    <div class="hidden" aria-hidden="true">
+      <input id="fileInput" type="file" accept=".xlsx" disabled>
+      <button id="analyzeButton" type="button" disabled>Analyze</button>
+    </div>
 
-    <section>
-      <div class="section-header">
-        <h2>How it works</h2>
-      </div>
-      <div class="compact-grid">
-        <article class="compact-card">
-          <h3>Upload workbook</h3>
-          <p>Select an Excel finance report for local analysis.</p>
-        </article>
-        <article class="compact-card">
-          <h3>Run QA checks</h3>
-          <p>Scan visible sheets for formula, value, variance, and total issues.</p>
-        </article>
-        <article class="compact-card">
-          <h3>Download checked Excel and reports</h3>
-          <p>Review highlighted cells, comments, QA_Report, HTML, and JSON outputs.</p>
-        </article>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-header">
-        <h2>Outputs</h2>
-      </div>
-      <div class="output-grid">
-        <article class="compact-card">
-          <h3>Browser summary</h3>
-          <p>Risk score, issue counts, and issue details after analysis.</p>
-        </article>
-        <article class="compact-card primary-output">
-          <h3>Checked Excel with QA_Report</h3>
-          <p>Highlighted cells, comments, and a QA_Report worksheet.</p>
-        </article>
-        <article class="compact-card">
-          <h3>HTML report</h3>
-          <p>A readable standalone report for review.</p>
-        </article>
-        <article class="compact-card">
-          <h3>JSON report</h3>
-          <p>Structured output for automation and follow-up workflows.</p>
-        </article>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-header">
-        <h2>Security &amp; privacy</h2>
-      </div>
-      <div class="security-panel">
-        <ul class="security-list">
-          <li>Finance reports can contain sensitive business data.</li>
-          <li>The current MVP can be run locally, so files stay on your machine during local testing.</li>
-          <li>For a hosted beta, uploaded files should be processed only for analysis and not stored permanently.</li>
-          <li>Private or self-hosted deployment can be considered for stricter requirements.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="beta">
-      <div class="beta-panel">
-        <div>
-          <h2>Private beta</h2>
-          <p>Help shape the workflow for real finance reporting teams and advisors.</p>
-        </div>
-        <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
-      </div>
-    </section>
-
-    <div id="status" class="status"></div>
-    <div id="emptyState" class="empty-state">Upload a workbook to see risk score, issue counts, and detected issues here.</div>
+    <div id="status" class="status hidden"></div>
+    <div id="emptyState" class="hidden"></div>
     <div id="results" class="hidden"></div>
   </main>
 
