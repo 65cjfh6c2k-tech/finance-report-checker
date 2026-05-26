@@ -1,15 +1,44 @@
 import json
 import os
+import urllib.error
+import urllib.request
+from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DOTENV_PATH = PROJECT_ROOT / ".env"
+ENABLED_VALUES = {"true", "1", "yes", "on"}
 
 DISABLED_AI_INSIGHTS = {
     "enabled": False,
     "executive_summary": "",
     "key_insights": [],
     "management_note": "",
+    "error": "AI insights disabled or API key missing.",
 }
 
-DEFAULT_MODEL = "gpt-5-mini"
+LOCAL_AI_UNAVAILABLE = {
+    "enabled": False,
+    "executive_summary": "",
+    "key_insights": [],
+    "management_note": "",
+    "error": "Local AI is not available. Start Ollama and check the configured model.",
+}
+
+LOCAL_AI_INVALID_JSON = {
+    "enabled": False,
+    "executive_summary": "",
+    "key_insights": [],
+    "management_note": "",
+    "error": "Local AI returned an invalid JSON response.",
+}
+
+DEFAULT_PROVIDER = "ollama"
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
+DEFAULT_OLLAMA_MODEL = "qwen2.5:7b"
 
 
 def build_ai_context(report: dict) -> dict:
@@ -47,18 +76,118 @@ def build_ai_context(report: dict) -> dict:
 
 
 def generate_ai_insights(report: dict) -> dict:
-    if not ai_insights_enabled():
-        return dict(DISABLED_AI_INSIGHTS)
+    load_dotenv(dotenv_path=DOTENV_PATH, override=True)
 
+    enabled_raw = os.getenv("AI_INSIGHTS_ENABLED", "")
+    is_enabled = ai_insights_enabled(enabled_raw)
+    provider = os.getenv("AI_PROVIDER", DEFAULT_PROVIDER).strip().lower()
+
+    print(f"AI provider: {provider}")
+    print(f"AI_INSIGHTS_ENABLED raw value: {enabled_raw!r}")
+
+    if not is_enabled:
+        return disabled_ai_insights()
+
+    if provider == "ollama":
+        return generate_ollama_insights(report)
+
+    if provider == "openai":
+        return generate_openai_insights(report)
+
+    print(f"AI provider error: unsupported provider {provider!r}")
+    return disabled_ai_insights(f"Unsupported AI provider: {provider}.")
+
+
+def generate_ollama_insights(report):
+    base_url = os.getenv("OLLAMA_BASE_URL", DEFAULT_OLLAMA_BASE_URL).rstrip("/")
+    model = os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL)
+
+    print(f"Ollama model: {model}")
+    print(f"Ollama base URL: {base_url}")
+    print("Ollama request started")
+
+    payload = {
+        "model": model,
+        "stream": False,
+        "format": "json",
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are a finance reporting QA assistant. Return only valid "
+                    "JSON. Do not use markdown. Do not wrap output in code fences."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Use only the sanitized AI context below. Do not infer from "
+                    "unavailable workbook cells.\n\n"
+                    "Return exactly this JSON object shape:\n"
+                    "{\n"
+                    '  "enabled": true,\n'
+                    '  "executive_summary": "Short paragraph for finance user.",\n'
+                    '  "key_insights": [\n'
+                    "    {\n"
+                    '      "title": "Short title",\n'
+                    '      "severity": "high",\n'
+                    '      "explanation": "What this means.",\n'
+                    '      "recommended_action": "What to review or fix."\n'
+                    "    }\n"
+                    "  ],\n"
+                    '  "management_note": "Short note the user could adapt before sending report."\n'
+                    "}\n\n"
+                    "Sanitized AI context:\n"
+                    f"{json.dumps(build_ai_context(report), indent=2)}"
+                ),
+            },
+        ],
+    }
+
+    try:
+        request = urllib.request.Request(
+            f"{base_url}/api/chat",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=120) as response:
+            print(f"Ollama HTTP status: {response.status}")
+            response_data = json.loads(response.read().decode("utf-8"))
+
+        print("Ollama request finished")
+        content = response_data.get("message", {}).get("content", "")
+        print(f"Ollama message.content exists: {bool(content)}")
+        insights = json.loads(content)
+        print("Ollama JSON parse success")
+        return normalize_ai_insights(insights)
+    except json.JSONDecodeError as error:
+        print("Ollama JSON parse failure")
+        print(f"Ollama response preview: {safe_response_preview(locals().get('content', ''))}")
+        print(f"Ollama error: {error.__class__.__name__}: {error}")
+        return dict(LOCAL_AI_INVALID_JSON)
+    except (urllib.error.URLError, TimeoutError) as error:
+        print(f"Ollama error: {error.__class__.__name__}: {error}")
+        return dict(LOCAL_AI_UNAVAILABLE)
+    except Exception as error:
+        print(f"Ollama error: {error.__class__.__name__}: {error}")
+        return dict(LOCAL_AI_UNAVAILABLE)
+
+
+def generate_openai_insights(report):
     api_key = os.getenv("OPENAI_API_KEY")
+    model = os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL)
+
+    print(f"OPENAI_MODEL: {model}")
+    print(f"OPENAI_API_KEY exists: {bool(api_key)}")
+
     if not api_key:
-        return dict(DISABLED_AI_INSIGHTS)
+        return disabled_ai_insights()
 
     try:
         from openai import OpenAI
 
         client = OpenAI(api_key=api_key)
-        model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
         response = client.responses.create(
             model=model,
             input=[
@@ -87,12 +216,68 @@ def generate_ai_insights(report: dict) -> dict:
         )
         insights = json.loads(response.output_text)
         return normalize_ai_insights(insights)
-    except Exception:
-        return dict(DISABLED_AI_INSIGHTS)
+    except Exception as error:
+        print(f"OpenAI error: {error.__class__.__name__}: {error}")
+        return disabled_ai_insights(f"AI insights failed: {error.__class__.__name__}.")
 
 
-def ai_insights_enabled():
-    return os.getenv("AI_INSIGHTS_ENABLED", "").strip().lower() == "true"
+def ai_insights_enabled(raw_value=None):
+    if raw_value is None:
+        load_dotenv(dotenv_path=DOTENV_PATH, override=True)
+        raw_value = os.getenv("AI_INSIGHTS_ENABLED", "")
+    return raw_value.strip().lower() in ENABLED_VALUES
+
+
+def disabled_ai_insights(error_message=None):
+    insights = dict(DISABLED_AI_INSIGHTS)
+    if error_message:
+        insights["error"] = error_message
+    return insights
+
+
+def safe_response_preview(content):
+    return str(content).replace("\n", " ")[:500]
+
+
+def parse_json_response(content):
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        extracted = extract_json_object(content)
+        if extracted is None:
+            raise
+        return json.loads(extracted)
+
+
+def extract_json_object(text):
+    start = text.find("{")
+    if start == -1:
+        return None
+
+    depth = 0
+    in_string = False
+    escape = False
+    for index in range(start, len(text)):
+        character = text[index]
+        if escape:
+            escape = False
+            continue
+        if character == "\\":
+            escape = True
+            continue
+        if character == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if character == "{":
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+
+    return None
 
 
 def ai_insights_schema():

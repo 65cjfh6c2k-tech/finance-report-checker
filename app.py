@@ -45,6 +45,8 @@ def build_download_urls(workbook_filename: str) -> dict:
 
 @app.post("/analyze")
 async def analyze_upload(file: UploadFile = File(...), include_ai: bool = False):
+    print(f"include_ai: {include_ai}")
+
     filename = Path(file.filename or "").name
     if not filename.lower().endswith(".xlsx"):
         raise HTTPException(
