@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
+from finance_checker.ai_insights import generate_ai_insights
 from finance_checker import analyze_workbook, save_report_outputs
 
 
@@ -43,7 +44,7 @@ def build_download_urls(workbook_filename: str) -> dict:
 
 
 @app.post("/analyze")
-async def analyze_upload(file: UploadFile = File(...)):
+async def analyze_upload(file: UploadFile = File(...), include_ai: bool = False):
     filename = Path(file.filename or "").name
     if not filename.lower().endswith(".xlsx"):
         raise HTTPException(
@@ -65,6 +66,9 @@ async def analyze_upload(file: UploadFile = File(...)):
         ) from error
 
     report["downloads"] = build_download_urls(filename)
+    if include_ai:
+        report["ai_insights"] = generate_ai_insights(report)
+
     return report
 
 
