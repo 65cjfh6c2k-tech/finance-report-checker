@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finance Report Checker</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #18212f;
+      --muted: #5e6b7a;
+      --line: #d9e0ea;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --danger: #b42318;
+      --high-bg: #fde2e2;
+      --high-text: #9b1c1c;
+      --medium-bg: #fff3cd;
+      --medium-text: #7a4d00;
+      --low-bg: #dff3e3;
+      --low-text: #0f6b2f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+
+    header {
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .panel,
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .upload-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    input[type="file"] {
+      flex: 1 1 280px;
+      min-width: 0;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .status {
+      min-height: 24px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      padding: 14px;
+    }
+
+    .label {
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .value {
+      overflow-wrap: anywhere;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    section {
+      margin-top: 22px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .summary-text {
+      padding: 14px 16px;
+      margin: 0;
+    }
+
+    .download-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px;
+      background: #eef6ff;
+      border-color: #b9d7ff;
+    }
+
+    .download-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .download-button:hover {
+      background: var(--accent-dark);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th {
+      background: #eef2f7;
+      color: #293241;
+    }
+
+    .badge {
+      display: inline-block;
+      min-width: 62px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .badge.high {
+      background: var(--high-bg);
+      color: var(--high-text);
+    }
+
+    .badge.medium {
+      background: var(--medium-bg);
+      color: var(--medium-text);
+    }
+
+    .badge.low {
+      background: var(--low-bg);
+      color: var(--low-text);
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        margin: 20px auto;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .upload-panel {
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Finance Report Checker</h1>
+      <p class="subtitle">Upload an Excel finance report and get a QA review.</p>
+    </header>
+
+    <div class="panel upload-panel">
+      <input id="fileInput" type="file" accept=".xlsx">
+      <button id="analyzeButton" type="button">Analyze</button>
+    </div>
+
+    <div id="status" class="status"></div>
+    <div id="results" class="hidden"></div>
+  </main>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/analyze";
+    const fileInput = document.getElementById("fileInput");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const statusArea = document.getElementById("status");
+    const resultsArea = document.getElementById("results");
+
+    analyzeButton.addEventListener("click", analyzeFile);
+
+    async function analyzeFile() {
+      const file = fileInput.files[0];
+      clearPage();
+
+      if (!file) {
+        showError("Choose an .xlsx file first.");
+        return;
+      }
+
+      if (!file.name.toLowerCase().endsWith(".xlsx")) {
+        showError("Only .xlsx files are supported.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      analyzeButton.disabled = true;
+      statusArea.textContent = "Analyzing workbook...";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || "The workbook could not be analyzed.");
+        }
+
+        statusArea.textContent = "";
+        renderReport(data);
+      } catch (error) {
+        showError(error.message || "Something went wrong while analyzing the file.");
+      } finally {
+        analyzeButton.disabled = false;
+      }
+    }
+
+    function clearPage() {
+      statusArea.className = "status";
+      statusArea.textContent = "";
+      resultsArea.className = "hidden";
+      resultsArea.innerHTML = "";
+    }
+
+    function showError(message) {
+      statusArea.className = "status error";
+      statusArea.textContent = message;
+    }
+
+    function renderReport(report) {
+      resultsArea.className = "";
+      resultsArea.innerHTML = `
+        <div class="summary-grid">
+          ${summaryCard("Workbook", report.workbook)}
+          ${summaryCard("Risk Score", report.risk_score)}
+          ${summaryCard("Risk Level", report.risk_level)}
+        </div>
+
+        <section>
+          <h2>Executive Summary</h2>
+          <p class="panel summary-text">${escapeHtml(report.executive_summary)}</p>
+        </section>
+
+        <section>
+          <h2>Issue Counts</h2>
+          <div class="summary-grid">
+            ${countCard("High", report.issue_counts?.high || 0, "high")}
+            ${countCard("Medium", report.issue_counts?.medium || 0, "medium")}
+            ${countCard("Low", report.issue_counts?.low || 0, "low")}
+          </div>
+        </section>
+
+        ${renderDownloads(report.downloads)}
+
+        <section>
+          <h2>Issues</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th>Type</th>
+                  <th>Sheet</th>
+                  <th>Cell</th>
+                  <th>Metric</th>
+                  <th>Period</th>
+                  <th>Message</th>
+                  <th>Business Impact</th>
+                  <th>Suggested Fix</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${renderIssueRows(report.issues || [])}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDownloads(downloads) {
+      if (!downloads) {
+        return "";
+      }
+
+      return `
+        <section id="downloads">
+          <h2>Downloads</h2>
+          <div class="panel download-actions">
+            ${downloadLink("Download HTML Report", downloads.html_report)}
+            ${downloadLink("Download JSON Report", downloads.json_report)}
+            ${downloadLink("Download Checked Excel", downloads.checked_excel)}
+          </div>
+        </section>
+      `;
+    }
+
+    function downloadLink(label, url) {
+      if (!url) {
+        return "";
+      }
+
+      return `
+        <a class="download-button" href="${escapeHtml(url)}" target="_blank" rel="noopener" download>
+          ${escapeHtml(label)}
+        </a>
+      `;
+    }
+
+    function summaryCard(label, value) {
+      return `
+        <div class="card">
+          <div class="label">${escapeHtml(label)}</div>
+          <div class="value">${escapeHtml(value)}</div>
+        </div>
+      `;
+    }
+
+    function countCard(label, value, severity) {
+      return `
+        <div class="card">
+          <div class="label">${escapeHtml(label)}</div>
+          <div class="value"><span class="badge ${severity}">${escapeHtml(value)}</span></div>
+        </div>
+      `;
+    }
+
+    function renderIssueRows(issues) {
+      if (issues.length === 0) {
+        return `<tr><td colspan="9">No issues detected.</td></tr>`;
+      }
+
+      return issues.map((issue) => `
+        <tr>
+          <td>${severityBadge(issue.severity)}</td>
+          <td>${escapeHtml(issue.type)}</td>
+          <td>${escapeHtml(issue.sheet)}</td>
+          <td>${escapeHtml(issue.cell)}</td>
+          <td>${escapeHtml(issue.metric)}</td>
+          <td>${escapeHtml(issue.period)}</td>
+          <td>${escapeHtml(issue.message)}</td>
+          <td>${escapeHtml(issue.business_impact)}</td>
+          <td>${escapeHtml(issue.suggested_fix)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function severityBadge(severity) {
+      const safeSeverity = escapeHtml(severity || "");
+      return `<span class="badge ${safeSeverity}">${safeSeverity}</span>`;
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) {
+        return "";
+      }
+
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
