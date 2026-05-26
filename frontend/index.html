@@ -13,6 +13,7 @@
       --line: #d9e0ea;
       --accent: #2563eb;
       --accent-dark: #1d4ed8;
+      --accent-soft: #eef6ff;
       --danger: #b42318;
       --high-bg: #fde2e2;
       --high-text: #9b1c1c;
@@ -39,20 +40,67 @@
       margin: 32px auto;
     }
 
-    header {
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      gap: 22px;
+      align-items: stretch;
       margin-bottom: 22px;
     }
 
     h1 {
-      margin: 0 0 6px;
-      font-size: 32px;
+      margin: 0 0 10px;
+      font-size: 42px;
       line-height: 1.15;
     }
 
     .subtitle {
+      margin: 0 0 12px;
+      color: #334155;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .description {
+      max-width: 780px;
       margin: 0;
       color: var(--muted);
       font-size: 16px;
+    }
+
+    .hero-copy,
+    .upload-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .hero-copy {
+      padding: 28px;
+    }
+
+    .hero-aside {
+      display: grid;
+      gap: 12px;
+      align-content: stretch;
+    }
+
+    .demo-stat {
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .demo-stat strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .demo-stat span {
+      color: var(--muted);
+      font-size: 14px;
     }
 
     .panel,
@@ -62,12 +110,75 @@
       border-radius: 8px;
     }
 
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      max-width: 620px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .feature-card,
+    .step-card,
+    .output-card {
+      min-height: 112px;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .feature-card h3,
+    .step-card h3,
+    .output-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .feature-card p,
+    .step-card p,
+    .output-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
+    .upload-section {
+      margin-top: 24px;
+    }
+
     .upload-panel {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 12px;
-      padding: 16px;
+      padding: 18px;
       margin-bottom: 18px;
     }
 
@@ -157,7 +268,7 @@
       flex-wrap: wrap;
       gap: 10px;
       padding: 14px;
-      background: #eef6ff;
+      background: var(--accent-soft);
       border-color: #b9d7ff;
     }
 
@@ -248,7 +359,19 @@
       }
 
       h1 {
-        font-size: 26px;
+        font-size: 30px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        padding: 20px;
+      }
+
+      .section-header {
+        display: block;
       }
 
       .upload-panel {
@@ -263,15 +386,110 @@
 </head>
 <body>
   <main>
-    <header>
-      <h1>Finance Report Checker</h1>
-      <p class="subtitle">Upload an Excel finance report and get a QA review.</p>
+    <header class="hero">
+      <div class="hero-copy">
+        <h1>Finance Report Checker</h1>
+        <p class="subtitle">AI-assisted QA for Excel-based finance reports.</p>
+        <p class="description">Upload a workbook and detect broken formulas, hardcoded values, blank cells, unusual variances, and total/subtotal mismatches before the report reaches management.</p>
+      </div>
+      <div class="hero-aside" aria-label="Product outputs">
+        <div class="demo-stat">
+          <strong>Risk score</strong>
+          <span>A quick read on workbook QA risk.</span>
+        </div>
+        <div class="demo-stat">
+          <strong>Checked Excel</strong>
+          <span>Highlighted cells, comments, and a QA_Report sheet.</span>
+        </div>
+      </div>
     </header>
 
-    <div class="panel upload-panel">
-      <input id="fileInput" type="file" accept=".xlsx">
-      <button id="analyzeButton" type="button">Analyze</button>
-    </div>
+    <section>
+      <div class="section-header">
+        <h2>What it checks</h2>
+        <p>Rule-based finance QA checks designed for spreadsheet review before management reporting.</p>
+      </div>
+      <div class="card-grid">
+        <article class="feature-card">
+          <h3>Formula inconsistencies</h3>
+          <p>Find formulas that break the pattern used by neighboring period cells.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Hardcoded values among formulas</h3>
+          <p>Spot numeric overrides in rows that appear to be formula-driven.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Blank cells inside financial rows</h3>
+          <p>Catch empty cells sitting between populated period values.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Large period-over-period variances</h3>
+          <p>Flag unusual adjacent-period movements that may need explanation.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Total/subtotal formula mismatches</h3>
+          <p>Review totals that may omit expected detail rows.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <h2>How it works</h2>
+      </div>
+      <div class="card-grid">
+        <article class="step-card">
+          <span class="step-number">1</span>
+          <h3>Upload Excel workbook</h3>
+          <p>Select a local .xlsx finance report.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-number">2</span>
+          <h3>Run finance QA checks</h3>
+          <p>The analyzer scans visible sheets and applies finance-specific rules.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-number">3</span>
+          <h3>Download checked workbook and reports</h3>
+          <p>Save the annotated Excel file, HTML report, or JSON report.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <h2>Outputs</h2>
+      </div>
+      <div class="card-grid">
+        <article class="output-card">
+          <h3>Browser summary</h3>
+          <p>Risk score, issue counts, downloads, and issue details after analysis.</p>
+        </article>
+        <article class="output-card">
+          <h3>HTML report</h3>
+          <p>A readable standalone report for review or sharing.</p>
+        </article>
+        <article class="output-card">
+          <h3>JSON report</h3>
+          <p>A structured output for automation and downstream workflows.</p>
+        </article>
+        <article class="output-card">
+          <h3>Checked Excel with QA_Report</h3>
+          <p>An annotated workbook with highlights, comments, and a QA summary sheet.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="upload-section">
+      <div class="section-header">
+        <h2>Analyze a workbook</h2>
+        <p>Upload an .xlsx file to generate the browser summary and downloadable reports.</p>
+      </div>
+      <div class="upload-panel">
+        <input id="fileInput" type="file" accept=".xlsx">
+        <button id="analyzeButton" type="button">Analyze</button>
+      </div>
+    </section>
 
     <div id="status" class="status"></div>
     <div id="results" class="hidden"></div>
