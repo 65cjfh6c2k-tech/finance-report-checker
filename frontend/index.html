@@ -465,6 +465,30 @@
       border-color: #D7C7AD;
     }
 
+    .charts-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .chart-card {
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .chart-container {
+      width: 100%;
+      min-height: 320px;
+    }
+
+    .chart-insight {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
     .table-wrap {
       max-height: 620px;
       overflow-x: auto;
@@ -708,6 +732,7 @@
     const statusArea = document.getElementById("status");
     const resultsArea = document.getElementById("results");
     const emptyState = document.getElementById("emptyState");
+    let plotlyLoadPromise = null;
 
     if (PUBLIC_LANDING_MODE) {
       fileInput.disabled = true;
@@ -804,6 +829,7 @@
         </section>
 
         ${renderDownloads(report.downloads)}
+        ${renderCharts(report.charts || [])}
 
         <section>
           <h2>Issues</h2>
@@ -829,6 +855,7 @@
           </div>
         </section>
       `;
+      renderPlotlyCharts(report.charts || []);
     }
 
     function renderDownloads(downloads) {
@@ -846,6 +873,88 @@
           </div>
         </section>
       `;
+    }
+
+    function renderCharts(charts) {
+      if (!charts || charts.length === 0) {
+        return "";
+      }
+
+      return `
+        <section id="charts">
+          <h2>Charts</h2>
+          <div class="charts-grid">
+            ${charts.map((chart, index) => `
+              <div class="chart-card">
+                <div id="chart-${index}" class="chart-container"></div>
+                <p class="chart-insight">${escapeHtml(chart.insight)}</p>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPlotlyCharts(charts) {
+      if (!charts || charts.length === 0) {
+        return;
+      }
+
+      loadPlotly().then(() => {
+        charts.forEach((chart, index) => {
+          const element = document.getElementById(`chart-${index}`);
+          if (!element || !window.Plotly) {
+            return;
+          }
+
+          const traces = (chart.series || []).map((series) => ({
+            x: chart.x || [],
+            y: series.y || [],
+            type: "scatter",
+            mode: "lines+markers",
+            name: series.name || chart.title || "Series",
+            line: { width: 3 },
+            marker: { size: 7 }
+          }));
+
+          window.Plotly.newPlot(
+            element,
+            traces,
+            {
+              title: { text: chart.title || "Chart", x: 0, xanchor: "left" },
+              margin: { t: 52, r: 20, b: 42, l: 58 },
+              paper_bgcolor: "#FFFFFF",
+              plot_bgcolor: "#FBFAF6",
+              font: { family: "Arial, Helvetica, sans-serif", color: "#18212F" },
+              xaxis: { showgrid: false },
+              yaxis: { gridcolor: "#E5DED2", zerolinecolor: "#E5DED2" },
+              legend: { orientation: "h", x: 0, y: -0.22 }
+            },
+            { responsive: true, displayModeBar: false }
+          );
+        });
+      }).catch(() => {
+        showError("Charts could not be loaded. The rest of the report is still available.");
+      });
+    }
+
+    function loadPlotly() {
+      if (window.Plotly) {
+        return Promise.resolve();
+      }
+
+      if (!plotlyLoadPromise) {
+        plotlyLoadPromise = new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdn.plot.ly/plotly-2.35.2.min.js";
+          script.async = true;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      return plotlyLoadPromise;
     }
 
     function downloadLink(label, url, variant) {
