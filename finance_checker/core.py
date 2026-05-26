@@ -2,6 +2,7 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
+from finance_checker.charts import build_chart_specs
 from finance_checker.rules import (
     cell_address,
     detect_row_issues,
@@ -103,10 +104,12 @@ def summarize_sheet(sheet, bounds):
 def analyze_workbook(file_path: str) -> dict:
     workbook_path = Path(file_path)
     workbook = load_workbook(workbook_path, data_only=False)
+    values_workbook = load_workbook(workbook_path, data_only=True)
     report = {
         "workbook": workbook_path.name,
         "sheets": [],
         "issues": [],
+        "charts": [],
     }
 
     for sheet in workbook.worksheets:
@@ -119,5 +122,6 @@ def analyze_workbook(file_path: str) -> dict:
             report["issues"].extend(detect_row_issues(sheet, bounds))
 
     report["issues"] = prioritize_issues(report["issues"])
+    report["charts"] = build_chart_specs(values_workbook, get_used_bounds)
     add_risk_summary(report)
     return report
