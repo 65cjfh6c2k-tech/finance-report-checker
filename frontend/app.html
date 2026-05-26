@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Finance Report Checker — Local App</title>
+  <script defer src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
   <style>
     :root {
       --bg: #F7F3EA;
@@ -712,6 +713,13 @@
 
       if (!plotlyLoadPromise) {
         plotlyLoadPromise = new Promise((resolve, reject) => {
+          const existingScript = document.querySelector(`script[src="${PLOTLY_URL}"]`);
+          if (existingScript) {
+            existingScript.addEventListener("load", resolve, { once: true });
+            existingScript.addEventListener("error", reject, { once: true });
+            return;
+          }
+
           const script = document.createElement("script");
           script.src = PLOTLY_URL;
           script.async = true;
