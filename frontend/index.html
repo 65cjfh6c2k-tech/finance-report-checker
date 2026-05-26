@@ -47,7 +47,7 @@
 
     main {
       width: min(1120px, calc(100% - 32px));
-      margin: 28px auto 44px;
+      margin: 22px auto 32px;
     }
 
     h1,
@@ -58,10 +58,11 @@
     }
 
     h1 {
+      max-width: 620px;
       margin-bottom: 12px;
       color: var(--navy);
-      font-size: 46px;
-      line-height: 1.08;
+      font-size: 54px;
+      line-height: 1.02;
       letter-spacing: 0;
     }
 
@@ -78,17 +79,39 @@
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
-      gap: 24px;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      gap: 32px;
       align-items: center;
-      padding: 28px 0 18px;
+      min-height: calc(100vh - 170px);
+      padding: 18px 0 14px;
+    }
+
+    .brand-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border: 1px solid #D7C7AD;
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
     }
 
     .eyebrow {
       display: inline-flex;
       align-items: center;
       min-height: 26px;
-      margin-bottom: 14px;
       padding: 0 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -100,9 +123,10 @@
     }
 
     .subtitle {
-      margin-bottom: 12px;
+      max-width: 620px;
+      margin-bottom: 14px;
       color: var(--navy);
-      font-size: 21px;
+      font-size: 22px;
       font-weight: 800;
     }
 
@@ -114,7 +138,7 @@
     }
 
     .checks-line {
-      margin: 16px 0 0;
+      margin: 18px 0 0;
       color: var(--navy);
       font-size: 14px;
       font-weight: 800;
@@ -124,7 +148,25 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 22px;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .button-link.primary.cta-primary {
+      min-height: 48px;
+      padding: 0 20px;
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .text-link {
+      color: var(--accent-dark);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .text-link:hover {
+      text-decoration: underline;
     }
 
     .microcopy {
@@ -191,8 +233,9 @@
     }
 
     .preview-card {
-      padding: 20px;
-      box-shadow: 0 10px 24px rgba(24, 33, 47, 0.06);
+      padding: 22px;
+      border-color: #D7C7AD;
+      box-shadow: 0 14px 32px rgba(24, 33, 47, 0.08);
     }
 
     .preview-header {
@@ -216,9 +259,9 @@
     }
 
     .preview-metric {
-      padding: 12px;
+      padding: 13px;
       background: var(--muted-panel);
-      border: 1px solid var(--line);
+      border: 1px solid transparent;
       border-radius: 8px;
     }
 
@@ -252,6 +295,16 @@
       margin: 12px 0;
     }
 
+    .preview-summary-line {
+      margin: 4px 0 12px;
+      padding: 10px 12px;
+      background: var(--muted-panel);
+      border-radius: 8px;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
     .preview-issue {
       padding: 12px;
       background: var(--high-bg);
@@ -273,10 +326,10 @@
     .preview-output {
       margin-top: 12px;
       padding: 12px;
-      background: var(--low-bg);
-      border: 1px solid #B7D8C1;
+      background: var(--sand);
+      border: 1px solid #D7C7AD;
       border-radius: 8px;
-      color: var(--low-text);
+      color: var(--navy);
       font-size: 14px;
       font-weight: 800;
     }
@@ -314,16 +367,17 @@
       grid-template-columns: 1.1fr 1fr;
       gap: 12px;
       align-items: stretch;
-      margin-top: 18px;
+      margin-top: 8px;
     }
 
     .strip-card {
-      padding: 14px 16px;
+      padding: 13px 16px;
       background: var(--panel);
-      border: 1px solid var(--line);
+      border: 0;
       border-radius: 8px;
       color: var(--muted);
       font-size: 14px;
+      box-shadow: inset 0 0 0 1px rgba(229, 222, 210, 0.85);
     }
 
     .strip-card strong {
@@ -334,8 +388,7 @@
     }
 
     .inactive-upload-note {
-      background: var(--sand);
-      border-color: #D7C7AD;
+      background: var(--muted-panel);
     }
 
     .section-header {
@@ -744,13 +797,17 @@
       }
 
       h1 {
-        font-size: 34px;
+        font-size: 38px;
       }
 
       button,
       .button-link,
       .download-button {
         width: 100%;
+      }
+
+      .text-link {
+        width: auto;
       }
     }
   </style>
@@ -759,21 +816,25 @@
   <main>
     <header class="hero">
       <div>
-        <span class="eyebrow">Local MVP</span>
-        <h1>Finance Report Checker</h1>
-        <p class="subtitle">Pre-send QA for Excel-based finance reports.</p>
-        <p class="description">Find spreadsheet issues before the report reaches management.</p>
+        <div class="brand-row">
+          <span class="brand-label">Finance Report Checker</span>
+          <span class="eyebrow">Local MVP</span>
+        </div>
+        <h1>Pre-send QA for Excel finance reports</h1>
+        <p class="subtitle">Catch spreadsheet issues before they reach management.</p>
+        <p class="description">Run finance-specific checks for formulas, hardcodes, blanks, variance spikes, and total mismatches before a workbook goes out.</p>
         <p class="checks-line">Formula errors · Hardcodes · Blank cells · Variance spikes · Total mismatches</p>
         <div class="hero-actions">
-          <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
-          <a class="button-link secondary" href="#sample-result">View sample result</a>
+          <a class="button-link primary cta-primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
+          <a class="button-link secondary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download sample checked Excel</a>
+          <a class="text-link" href="#sample-result">View sample result</a>
         </div>
         <p class="microcopy">Local/private demo only. Do not upload confidential workbooks to public demo environments.</p>
       </div>
 
       <aside id="sample-result" class="preview-card" aria-label="Sample QA result">
         <div class="preview-header">
-          <h2>Sample QA result</h2>
+          <h2>Sample QA report</h2>
           <span class="badge high">High</span>
         </div>
         <div class="preview-score">
@@ -786,21 +847,13 @@
             <strong>High</strong>
           </div>
         </div>
-        <div class="preview-metric">
-          <span>Issues found</span>
-          <strong>9</strong>
-        </div>
-        <div class="preview-counts">
-          <span class="badge high">High: 1</span>
-          <span class="badge medium">Medium: 7</span>
-          <span class="badge low">Low: 1</span>
-        </div>
+        <div class="preview-summary-line">Issues: 1 high · 7 medium · 1 low</div>
         <div class="preview-issue">
           <span>Top issue</span>
           <strong>Total formula may omit detail rows</strong>
           <p>OPEX Detail · F9 · May</p>
         </div>
-        <div class="preview-output">Checked Excel with highlighted cells, comments, and QA_Report</div>
+        <div class="preview-output">Output package: Checked Excel, HTML report, JSON</div>
         <div class="sample-downloads">
           <h3>View sample output</h3>
           <div class="sample-download-actions">
@@ -814,12 +867,10 @@
 
     <section class="compact-strip" aria-label="Product context">
       <div class="strip-card">
-        <strong>Built for finance review workflows</strong>
-        Built for FP&amp;A analysts, finance managers, controllers, CFOs, and finance consultants.
+        Built for FP&amp;A analysts, finance managers, controllers, CFOs and finance consultants.
       </div>
       <div class="strip-card inactive-upload-note">
-        <strong>Landing / waitlist mode</strong>
-        Current public page is a landing/waitlist. File analysis is available in local/private beta. Upload analysis is available in local/private beta.
+        Hosted beta for anonymized files. Local/private deployment available for sensitive workflows.
       </div>
     </section>
 
