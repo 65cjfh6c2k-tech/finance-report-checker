@@ -39,15 +39,16 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(239, 230, 214, 0.95), rgba(247, 243, 234, 0) 42%),
+        linear-gradient(180deg, #FBFAF6 0%, var(--bg) 48%, #F3EDE2 100%);
       color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
       line-height: 1.5;
     }
 
-    main {
-      width: min(1120px, calc(100% - 32px));
-      margin: 22px auto 32px;
+    a {
+      color: inherit;
     }
 
     h1,
@@ -57,122 +58,107 @@
       margin-top: 0;
     }
 
-    h1 {
-      max-width: 620px;
-      margin-bottom: 12px;
-      color: var(--navy);
-      font-size: 54px;
-      line-height: 1.02;
-      letter-spacing: 0;
+    .announcement {
+      padding: 8px 16px;
+      background: var(--navy);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
     }
 
-    h2 {
-      margin-bottom: 10px;
-      color: var(--navy);
-      font-size: 22px;
+    .site-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
     }
 
-    h3 {
-      margin-bottom: 6px;
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 0 8px;
+    }
+
+    .brand {
+      color: var(--navy);
       font-size: 15px;
+      font-weight: 900;
+      text-decoration: none;
     }
 
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
-      gap: 32px;
-      align-items: center;
-      min-height: calc(100vh - 170px);
-      padding: 18px 0 14px;
-    }
-
-    .brand-row {
+    .nav-links {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
       align-items: center;
-      margin-bottom: 14px;
+      gap: 18px;
     }
 
-    .brand-label {
-      display: inline-flex;
-      align-items: center;
-      min-height: 26px;
-      padding: 0 10px;
-      border: 1px solid #D7C7AD;
-      border-radius: 999px;
-      background: var(--panel);
-      color: var(--navy);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      min-height: 26px;
-      padding: 0 10px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--sand);
-      color: var(--navy);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .subtitle {
-      max-width: 620px;
-      margin-bottom: 14px;
-      color: var(--navy);
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .description {
-      max-width: 720px;
-      margin-bottom: 0;
+    .nav-links a {
       color: var(--muted);
-      font-size: 16px;
-    }
-
-    .checks-line {
-      margin: 18px 0 0;
-      color: var(--navy);
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-top: 24px;
-    }
-
-    .button-link.primary.cta-primary {
-      min-height: 48px;
-      padding: 0 20px;
-      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
-    }
-
-    .text-link {
-      color: var(--accent-dark);
       font-size: 14px;
       font-weight: 800;
       text-decoration: none;
     }
 
-    .text-link:hover {
-      text-decoration: underline;
+    .nav-links a:hover {
+      color: var(--navy);
     }
 
-    .microcopy {
-      margin: 16px 0 0;
+    main {
+      padding: 42px 0 36px;
+    }
+
+    .hero {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      margin-bottom: 18px;
+      padding: 0 11px;
+      border-radius: 999px;
+      background: var(--sand);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 820px;
+      margin: 0 auto 14px;
+      color: var(--navy);
+      font-size: 64px;
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-bottom: 10px;
+      color: var(--navy);
+      font-size: 23px;
+      font-weight: 900;
+    }
+
+    .description {
+      max-width: 690px;
+      margin: 0 auto;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 17px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 26px;
     }
 
     .button-link,
@@ -183,8 +169,8 @@
       justify-content: center;
       min-height: 42px;
       padding: 0 15px;
-      border-radius: 6px;
-      font-weight: 800;
+      border-radius: 7px;
+      font-weight: 900;
       text-decoration: none;
     }
 
@@ -194,13 +180,21 @@
       border: 0;
       background: var(--accent);
       color: #ffffff;
+      box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
     }
 
     .button-link.secondary,
     .download-button.secondary {
       border: 1px solid var(--line);
-      background: #ffffff;
-      color: var(--accent-dark);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--navy);
+    }
+
+    .button-link.small {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 13px;
     }
 
     .button-link.primary:hover,
@@ -224,18 +218,31 @@
       opacity: 0.65;
     }
 
-    .preview-card,
-    .panel,
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
+    .text-link {
+      color: var(--accent-dark);
+      font-size: 14px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .text-link:hover {
+      text-decoration: underline;
     }
 
     .preview-card {
-      padding: 22px;
-      border-color: #D7C7AD;
-      box-shadow: 0 14px 32px rgba(24, 33, 47, 0.08);
+      max-width: 980px;
+      margin: 42px auto 0;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 24px 70px rgba(24, 33, 47, 0.16);
+    }
+
+    .preview-inner {
+      padding: 24px;
+      border: 1px solid rgba(229, 222, 210, 0.95);
+      border-radius: 14px;
+      background: var(--panel);
     }
 
     .preview-header {
@@ -243,322 +250,120 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
-    .preview-header h2 {
+    .preview-title {
       margin-bottom: 0;
-      font-size: 18px;
+      color: var(--navy);
+      font-size: 20px;
     }
 
-    .preview-score {
+    .preview-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
+      grid-template-columns: 1fr 1fr 1.45fr;
+      gap: 12px;
     }
 
-    .preview-metric {
-      padding: 13px;
+    .preview-metric,
+    .preview-panel {
+      padding: 16px;
+      border-radius: 12px;
       background: var(--muted-panel);
-      border: 1px solid transparent;
-      border-radius: 8px;
     }
 
-    .preview-metric span,
-    .preview-issue span,
-    .label {
+    .preview-metric.high {
+      background: var(--high-bg);
+    }
+
+    .label,
+    .preview-label {
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 900;
       text-transform: uppercase;
     }
 
-    .preview-metric strong {
+    .preview-value {
+      display: block;
       color: var(--navy);
-      font-size: 24px;
-      line-height: 1.1;
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.05;
     }
 
-    .preview-metric.high strong,
-    .risk-high .value,
-    .risk-high .risk-score-value {
+    .preview-metric.high .preview-value {
       color: var(--high-text);
     }
 
-    .preview-counts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0;
+    .preview-panel {
+      display: grid;
+      gap: 12px;
     }
 
-    .preview-summary-line {
-      margin: 4px 0 12px;
-      padding: 10px 12px;
-      background: var(--muted-panel);
-      border-radius: 8px;
-      color: var(--navy);
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .preview-issue {
-      padding: 12px;
+    .issue-callout {
+      padding: 14px;
+      border-radius: 10px;
       background: var(--high-bg);
-      border: 1px solid #E9B8B8;
-      border-radius: 8px;
+      color: var(--text);
     }
 
-    .preview-issue strong {
+    .issue-callout strong {
       display: block;
       margin-bottom: 4px;
+      color: var(--navy);
+      font-size: 16px;
     }
 
-    .preview-issue p {
+    .issue-callout p,
+    .output-line {
       margin-bottom: 0;
       color: var(--muted);
-      font-size: 14px;
-    }
-
-    .preview-output {
-      margin-top: 12px;
-      padding: 12px;
-      background: var(--sand);
-      border: 1px solid #D7C7AD;
-      border-radius: 8px;
-      color: var(--navy);
       font-size: 14px;
       font-weight: 800;
     }
 
     .sample-downloads {
-      margin-top: 12px;
-      padding-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+      padding-top: 16px;
       border-top: 1px solid var(--line);
     }
 
-    .sample-downloads h3 {
-      margin-bottom: 8px;
-      color: var(--navy);
-    }
-
-    .sample-download-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .sample-download-actions .button-link,
-    .sample-download-actions .download-button {
-      min-height: 36px;
-      padding: 0 11px;
+    .sample-downloads .download-button {
+      min-height: 38px;
+      padding: 0 12px;
       font-size: 13px;
+      box-shadow: none;
     }
 
-    section {
-      margin-top: 24px;
-    }
-
-    .compact-strip {
+    .trust-strip {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      align-items: stretch;
-      margin-top: 8px;
+      max-width: 980px;
+      margin: 16px auto 0;
     }
 
-    .strip-card {
-      padding: 13px 16px;
-      background: var(--panel);
-      border: 0;
-      border-radius: 8px;
+    .trust-card {
+      padding: 15px 17px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.72);
       color: var(--muted);
-      font-size: 14px;
-      box-shadow: inset 0 0 0 1px rgba(229, 222, 210, 0.85);
-    }
-
-    .strip-card strong {
-      display: block;
-      margin-bottom: 3px;
-      color: var(--navy);
-      font-size: 15px;
-    }
-
-    .inactive-upload-note {
-      background: var(--muted-panel);
-    }
-
-    .section-header {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-
-    .section-header p {
-      max-width: 620px;
-      margin-bottom: 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .upload-panel {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 14px;
-      align-items: end;
-      padding: 20px;
-      border-color: #D7C7AD;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-    }
-
-    .upload-copy {
-      grid-column: 1 / -1;
-    }
-
-    .upload-copy p {
-      margin-bottom: 4px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .upload-note {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .public-note {
-      grid-column: 1 / -1;
-      padding: 12px;
-      background: var(--muted-panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .security-warning {
-      grid-column: 1 / -1;
-      padding: 12px;
-      background: var(--high-bg);
-      border: 1px solid #E9B8B8;
-      border-radius: 8px;
-      color: var(--high-text);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .upload-beta-action {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    input[type="file"] {
-      width: 100%;
-      min-width: 0;
-      padding: 11px;
-      background: #ffffff;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-    }
-
-    input[type="file"]:disabled {
-      background: var(--muted-panel);
-      color: var(--muted);
-      cursor: not-allowed;
-    }
-
-    .pill-row,
-    .compact-grid,
-    .output-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .pill-row {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-
-    .pill {
-      padding: 11px 12px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      color: var(--navy);
       font-size: 14px;
       font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(229, 222, 210, 0.9);
     }
 
-    .compact-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .output-grid {
-      grid-template-columns: 1fr 1.2fr 1fr 1fr;
-    }
-
-    .compact-card {
-      min-height: 96px;
-      padding: 14px;
+    .panel,
+    .card {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
-    }
-
-    .compact-card p {
-      margin-bottom: 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .compact-card.primary-output {
-      background: var(--low-bg);
-      border-color: #B7D8C1;
-    }
-
-    .security-panel,
-    .beta-panel {
-      padding: 18px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-    }
-
-    .security-panel {
-      border-left: 4px solid var(--navy);
-    }
-
-    .security-list {
-      display: grid;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      color: var(--muted);
-      list-style: none;
-    }
-
-    .security-list li {
-      padding-left: 14px;
-      border-left: 2px solid #D7C7AD;
-    }
-
-    .beta-panel {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 16px;
-      align-items: center;
-      background: var(--sand);
-      border-color: #D7C7AD;
-    }
-
-    .beta-panel p {
-      margin-bottom: 0;
-      color: var(--muted);
     }
 
     .status {
@@ -641,6 +446,11 @@
       color: var(--medium-text);
     }
 
+    .risk-high .value,
+    .risk-high .risk-score-value {
+      color: var(--high-text);
+    }
+
     .summary-text {
       padding: 14px 16px;
       margin: 0;
@@ -653,12 +463,6 @@
       padding: 14px;
       background: var(--sand);
       border-color: #D7C7AD;
-    }
-
-    .download-button.secondary {
-      background: #ffffff;
-      color: var(--accent-dark);
-      border: 1px solid var(--line);
     }
 
     .table-wrap {
@@ -705,8 +509,13 @@
     }
 
     th:nth-child(1),
-    td:nth-child(1) {
-      width: 96px;
+    td:nth-child(1),
+    th:nth-child(3),
+    td:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(4),
+    th:nth-child(6),
+    td:nth-child(6) {
       white-space: nowrap;
     }
 
@@ -714,30 +523,6 @@
     td:nth-child(2) {
       width: 230px;
       overflow-wrap: break-word;
-    }
-
-    th:nth-child(3),
-    td:nth-child(3) {
-      width: 140px;
-      white-space: nowrap;
-    }
-
-    th:nth-child(4),
-    td:nth-child(4) {
-      width: 70px;
-      white-space: nowrap;
-    }
-
-    th:nth-child(5),
-    td:nth-child(5) {
-      width: 190px;
-      overflow-wrap: break-word;
-    }
-
-    th:nth-child(6),
-    td:nth-child(6) {
-      width: 90px;
-      white-space: nowrap;
     }
 
     th:nth-child(7),
@@ -756,7 +541,7 @@
       padding: 3px 8px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       text-align: center;
       text-transform: uppercase;
     }
@@ -777,30 +562,39 @@
     }
 
     @media (max-width: 820px) {
-      main {
+      .site-shell {
         width: min(100% - 20px, 1120px);
-        margin-top: 18px;
       }
 
-      .hero,
-      .upload-panel,
-      .beta-panel {
-        grid-template-columns: 1fr;
+      .nav {
+        align-items: flex-start;
       }
 
-      .pill-row,
-      .compact-grid,
-      .output-grid,
-      .compact-strip,
-      .results-summary {
-        grid-template-columns: 1fr;
+      .nav-links {
+        gap: 10px;
+      }
+
+      .nav-links a:not(.button-link) {
+        display: none;
+      }
+
+      main {
+        padding-top: 34px;
       }
 
       h1 {
-        font-size: 38px;
+        font-size: 42px;
       }
 
-      button,
+      .subtitle {
+        font-size: 20px;
+      }
+
+      .hero-actions,
+      .sample-downloads {
+        flex-direction: column;
+      }
+
       .button-link,
       .download-button {
         width: 100%;
@@ -809,80 +603,101 @@
       .text-link {
         width: auto;
       }
+
+      .preview-card {
+        margin-top: 32px;
+        padding: 8px;
+      }
+
+      .preview-inner {
+        padding: 16px;
+      }
+
+      .preview-grid,
+      .trust-strip,
+      .results-summary {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <main>
-    <header class="hero">
-      <div>
-        <div class="brand-row">
-          <span class="brand-label">Finance Report Checker</span>
-          <span class="eyebrow">Local MVP</span>
-        </div>
+  <div class="announcement">Private beta · Sample QA report available</div>
+
+  <div class="site-shell">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#">Finance Report Checker</a>
+      <div class="nav-links">
+        <a href="#sample-result">Sample output</a>
+        <a href="#security-note">Security</a>
+        <a class="button-link primary small" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta</a>
+      </div>
+    </nav>
+
+    <main>
+      <header class="hero">
+        <span class="eyebrow">FP&amp;A Reporting QA</span>
         <h1>Pre-send QA for Excel finance reports</h1>
         <p class="subtitle">Catch spreadsheet issues before they reach management.</p>
         <p class="description">Run finance-specific checks for formulas, hardcodes, blanks, variance spikes, and total mismatches before a workbook goes out.</p>
-        <p class="checks-line">Formula errors · Hardcodes · Blank cells · Variance spikes · Total mismatches</p>
         <div class="hero-actions">
-          <a class="button-link primary cta-primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
+          <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
           <a class="button-link secondary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download sample checked Excel</a>
-          <a class="text-link" href="#sample-result">View sample result</a>
+          <a class="text-link" href="/demo/sample_report.html" target="_blank" rel="noopener">View sample report</a>
         </div>
-        <p class="microcopy">Local/private demo only. Do not upload confidential workbooks to public demo environments.</p>
+      </header>
+
+      <section id="sample-result" class="preview-card" aria-label="Sample QA report">
+        <div class="preview-inner">
+          <div class="preview-header">
+            <h2 class="preview-title">Sample QA report</h2>
+            <span class="badge high">High risk</span>
+          </div>
+          <div class="preview-grid">
+            <div class="preview-metric high">
+              <span class="preview-label">Risk score</span>
+              <strong class="preview-value">38 / 100</strong>
+            </div>
+            <div class="preview-metric high">
+              <span class="preview-label">Risk level</span>
+              <strong class="preview-value">High</strong>
+            </div>
+            <div class="preview-panel">
+              <div>
+                <span class="preview-label">Issues</span>
+                <strong>1 high · 7 medium · 1 low</strong>
+              </div>
+              <div class="issue-callout">
+                <span class="preview-label">Top issue</span>
+                <strong>Total formula may omit detail rows</strong>
+                <p>OPEX Detail · F9 · May</p>
+              </div>
+              <p class="output-line">Output package: Checked Excel · HTML report · JSON</p>
+            </div>
+          </div>
+          <div class="sample-downloads">
+            <a class="download-button primary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download checked Excel</a>
+            <a class="download-button secondary" href="/demo/sample_report.html" target="_blank" rel="noopener">View HTML report</a>
+            <a class="download-button secondary" href="/demo/sample_report.json" download="sample_report.json">Download JSON</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="security-note" class="trust-strip" aria-label="Security and audience notes">
+        <div class="trust-card">Built for FP&amp;A analysts, finance managers, controllers, CFOs and finance consultants.</div>
+        <div class="trust-card">Hosted beta for anonymized files. Local/private deployment available for sensitive workflows.</div>
+      </section>
+
+      <div class="hidden" aria-hidden="true">
+        <input id="fileInput" type="file" accept=".xlsx" disabled>
+        <button id="analyzeButton" type="button" disabled>Analyze</button>
       </div>
 
-      <aside id="sample-result" class="preview-card" aria-label="Sample QA result">
-        <div class="preview-header">
-          <h2>Sample QA report</h2>
-          <span class="badge high">High</span>
-        </div>
-        <div class="preview-score">
-          <div class="preview-metric high">
-            <span>Risk score</span>
-            <strong>38 / 100</strong>
-          </div>
-          <div class="preview-metric high">
-            <span>Risk level</span>
-            <strong>High</strong>
-          </div>
-        </div>
-        <div class="preview-summary-line">Issues: 1 high · 7 medium · 1 low</div>
-        <div class="preview-issue">
-          <span>Top issue</span>
-          <strong>Total formula may omit detail rows</strong>
-          <p>OPEX Detail · F9 · May</p>
-        </div>
-        <div class="preview-output">Output package: Checked Excel, HTML report, JSON</div>
-        <div class="sample-downloads">
-          <h3>View sample output</h3>
-          <div class="sample-download-actions">
-            <a class="download-button primary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download sample checked Excel</a>
-            <a class="download-button secondary" href="/demo/sample_report.html" target="_blank" rel="noopener">View sample HTML report</a>
-            <a class="download-button secondary" href="/demo/sample_report.json" download="sample_report.json">Download sample JSON</a>
-          </div>
-        </div>
-      </aside>
-    </header>
-
-    <section class="compact-strip" aria-label="Product context">
-      <div class="strip-card">
-        Built for FP&amp;A analysts, finance managers, controllers, CFOs and finance consultants.
-      </div>
-      <div class="strip-card inactive-upload-note">
-        Hosted beta for anonymized files. Local/private deployment available for sensitive workflows.
-      </div>
-    </section>
-
-    <div class="hidden" aria-hidden="true">
-      <input id="fileInput" type="file" accept=".xlsx" disabled>
-      <button id="analyzeButton" type="button" disabled>Analyze</button>
-    </div>
-
-    <div id="status" class="status hidden"></div>
-    <div id="emptyState" class="hidden"></div>
-    <div id="results" class="hidden"></div>
-  </main>
+      <div id="status" class="status hidden"></div>
+      <div id="emptyState" class="hidden"></div>
+      <div id="results" class="hidden"></div>
+    </main>
+  </div>
 
   <script>
     const API_URL = "http://127.0.0.1:8000/analyze";
