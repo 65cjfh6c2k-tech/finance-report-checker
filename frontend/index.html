@@ -325,6 +325,66 @@
       font-weight: 800;
     }
 
+    .sample-ai {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--muted-panel);
+      box-shadow: inset 0 0 0 1px rgba(229, 222, 210, 0.95);
+    }
+
+    .sample-ai-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sample-ai-title {
+      margin-bottom: 0;
+      color: var(--navy);
+      font-size: 17px;
+    }
+
+    .sample-ai-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .sample-ai-card {
+      padding: 12px;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .sample-ai-card strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .sample-ai-card p,
+    .sample-ai-note,
+    .sample-ai-microcopy {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .sample-ai-note {
+      margin-top: 12px;
+      color: var(--navy);
+    }
+
+    .sample-ai-microcopy {
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
     .sample-downloads {
       display: flex;
       flex-wrap: wrap;
@@ -638,6 +698,7 @@
       }
 
       .preview-grid,
+      .sample-ai-grid,
       .trust-strip,
       .results-summary {
         grid-template-columns: 1fr;
@@ -698,6 +759,28 @@
               </div>
               <p class="output-line">Output package: Checked Excel · HTML report · JSON</p>
             </div>
+          </div>
+          <div class="sample-ai">
+            <div class="sample-ai-header">
+              <h3 class="sample-ai-title">Sample AI insights</h3>
+              <span class="badge low">Local/private AI</span>
+            </div>
+            <div class="sample-ai-grid">
+              <div class="sample-ai-card">
+                <strong>OPEX total formula risk</strong>
+                <p>May OPEX detail total may omit expected rows, which can distort expense analysis.</p>
+              </div>
+              <div class="sample-ai-card">
+                <strong>SG&amp;A variance needs review</strong>
+                <p>The report shows a sharp SG&amp;A movement around Sep/Oct that should be explained before management review.</p>
+              </div>
+              <div class="sample-ai-card">
+                <strong>Formula consistency issue</strong>
+                <p>A formula pattern differs from nearby periods and may affect trend reliability.</p>
+              </div>
+            </div>
+            <p class="sample-ai-note">Before sharing the report, review OPEX total formulas, explain unusual SG&amp;A movements, and validate key profitability formulas.</p>
+            <p class="sample-ai-microcopy">Public page shows sample AI output only. Real AI insights are available in local/private beta.</p>
           </div>
           <div class="sample-downloads">
             <a class="download-button primary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download checked Excel</a>
