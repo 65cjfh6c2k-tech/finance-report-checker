@@ -1,0 +1,146 @@
+{
+  "workbook": "sample_finance_report_large.xlsx",
+  "sheets": [
+    {
+      "name": "P&L Monthly",
+      "used_range": "A1:N16",
+      "non_empty_cells": 223,
+      "formula_cells": 110,
+      "numeric_constant_cells": 84,
+      "blank_cells_inside_used_range": 1
+    },
+    {
+      "name": "OPEX Detail",
+      "used_range": "A1:N9",
+      "non_empty_cells": 126,
+      "formula_cells": 20,
+      "numeric_constant_cells": 84,
+      "blank_cells_inside_used_range": 0
+    },
+    {
+      "name": "Reconciliation",
+      "used_range": "A1:N7",
+      "non_empty_cells": 98,
+      "formula_cells": 78,
+      "numeric_constant_cells": 0,
+      "blank_cells_inside_used_range": 0
+    },
+    {
+      "name": "Sources",
+      "used_range": "A1:D3",
+      "non_empty_cells": 12,
+      "formula_cells": 0,
+      "numeric_constant_cells": 0,
+      "blank_cells_inside_used_range": 0
+    }
+  ],
+  "issues": [
+    {
+      "severity": "medium",
+      "type": "formula_inconsistency_in_row",
+      "sheet": "P&L Monthly",
+      "cell": "E4",
+      "metric": "Total Net Sales",
+      "period": "Apr",
+      "message": "Formula pattern differs from neighboring formulas in the same row.",
+      "suggested_fix": "Review whether this formula should match the copied pattern used nearby.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "hardcoded_value_among_formulas",
+      "sheet": "P&L Monthly",
+      "cell": "D8",
+      "metric": "Gross Margin",
+      "period": "Mar",
+      "message": "Numeric constant found in a row that mostly contains formulas.",
+      "suggested_fix": "Check whether this value should be a formula copied from adjacent periods.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "low",
+      "type": "blank_cell_between_values",
+      "sheet": "P&L Monthly",
+      "cell": "G9",
+      "metric": "Research & Development",
+      "period": "Jun",
+      "message": "Blank cell found between non-empty cells in the same row.",
+      "suggested_fix": "Check whether this blank cell should contain a value or formula.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "variance_spike_between_periods",
+      "sheet": "P&L Monthly",
+      "cell": "J10",
+      "metric": "Selling, General & Administrative",
+      "period": "Sep",
+      "message": "Value changed by more than 50% compared with the previous period.",
+      "suggested_fix": "Review whether this period-over-period movement is expected and properly explained.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "variance_spike_between_periods",
+      "sheet": "P&L Monthly",
+      "cell": "K10",
+      "metric": "Selling, General & Administrative",
+      "period": "Oct",
+      "message": "Value changed by more than 50% compared with the previous period.",
+      "suggested_fix": "Review whether this period-over-period movement is expected and properly explained.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "formula_inconsistency_in_row",
+      "sheet": "P&L Monthly",
+      "cell": "K12",
+      "metric": "Operating Income",
+      "period": "Oct",
+      "message": "Formula pattern differs from neighboring formulas in the same row.",
+      "suggested_fix": "Review whether this formula should match the copied pattern used nearby.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "variance_spike_between_periods",
+      "sheet": "OPEX Detail",
+      "cell": "J8",
+      "metric": "Other G&A",
+      "period": "Sep",
+      "message": "Value changed by more than 50% compared with the previous period.",
+      "suggested_fix": "Review whether this period-over-period movement is expected and properly explained.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "medium",
+      "type": "variance_spike_between_periods",
+      "sheet": "OPEX Detail",
+      "cell": "K8",
+      "metric": "Other G&A",
+      "period": "Oct",
+      "message": "Value changed by more than 50% compared with the previous period.",
+      "suggested_fix": "Review whether this period-over-period movement is expected and properly explained.",
+      "business_impact": "This may affect the reliability of the financial report."
+    },
+    {
+      "severity": "high",
+      "type": "total_formula_mismatch",
+      "sheet": "OPEX Detail",
+      "cell": "F9",
+      "metric": "Total OPEX Detail",
+      "period": "May",
+      "message": "Total formula may not include all expected detail rows.",
+      "suggested_fix": "Review whether the total formula includes all relevant detail rows for this period.",
+      "business_impact": "This may affect operating expense analysis."
+    }
+  ],
+  "issue_counts": {
+    "high": 1,
+    "medium": 7,
+    "low": 1
+  },
+  "risk_score": 38,
+  "risk_level": "high",
+  "executive_summary": "The workbook contains 9 potential issues: 1 high, 7 medium, and 1 low. The main risks are hardcoded values among formulas, total formulas that may omit detail rows, large period-over-period variances, formula inconsistencies, and blank cells between values."
+}

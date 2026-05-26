@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Finance Report Checker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 32px;
+      background: #f6f7f9;
+      color: #1f2933;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #d9dee7;
+      padding: 28px;
+    }
+    h1, h2 {
+      margin: 0 0 12px;
+    }
+    section {
+      margin-top: 28px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .summary-item {
+      background: #f6f7f9;
+      border: 1px solid #d9dee7;
+      padding: 12px;
+    }
+    .label {
+      color: #52606d;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+    }
+    th, td {
+      border: 1px solid #d9dee7;
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eef2f7;
+    }
+    .badge {
+      display: inline-block;
+      min-width: 56px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .badge.high {
+      background: #fde2e2;
+      color: #9b1c1c;
+    }
+    .badge.medium {
+      background: #fff3cd;
+      color: #7a4d00;
+    }
+    .badge.low {
+      background: #dff3e3;
+      color: #0f6b2f;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Finance Report Checker</h1>
+    <div class="summary">
+      <div class="summary-item">
+        <div class="label">Workbook</div>
+        <div class="value">sample_finance_report_large.xlsx</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">Risk Score</div>
+        <div class="value">38</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">Risk Level</div>
+        <div class="value">high</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive Summary</h2>
+      <p>The workbook contains 9 potential issues: 1 high, 7 medium, and 1 low. The main risks are hardcoded values among formulas, total formulas that may omit detail rows, large period-over-period variances, formula inconsistencies, and blank cells between values.</p>
+    </section>
+
+    <section>
+      <h2>Issue Counts by Severity</h2>
+      <table>
+        <thead>
+          <tr><th>Severity</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge high">high</span></td><td>1</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>7</td></tr>
+<tr><td><span class="badge low">low</span></td><td>1</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Sheet Statistics</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Sheet</th>
+            <th>Used Range</th>
+            <th>Non-empty Cells</th>
+            <th>Formula Cells</th>
+            <th>Numeric Constant Cells</th>
+            <th>Blank Cells Inside Used Range</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>P&amp;L Monthly</td><td>A1:N16</td><td>223</td><td>110</td><td>84</td><td>1</td></tr>
+<tr><td>OPEX Detail</td><td>A1:N9</td><td>126</td><td>20</td><td>84</td><td>0</td></tr>
+<tr><td>Reconciliation</td><td>A1:N7</td><td>98</td><td>78</td><td>0</td><td>0</td></tr>
+<tr><td>Sources</td><td>A1:D3</td><td>12</td><td>0</td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Issues</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Type</th>
+            <th>Sheet</th>
+            <th>Cell</th>
+            <th>Metric</th>
+            <th>Period</th>
+            <th>Message</th>
+            <th>Business Impact</th>
+            <th>Suggested Fix</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge medium">medium</span></td><td>formula_inconsistency_in_row</td><td>P&amp;L Monthly</td><td>E4</td><td>Total Net Sales</td><td>Apr</td><td>Formula pattern differs from neighboring formulas in the same row.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this formula should match the copied pattern used nearby.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>hardcoded_value_among_formulas</td><td>P&amp;L Monthly</td><td>D8</td><td>Gross Margin</td><td>Mar</td><td>Numeric constant found in a row that mostly contains formulas.</td><td>This may affect the reliability of the financial report.</td><td>Check whether this value should be a formula copied from adjacent periods.</td></tr>
+<tr><td><span class="badge low">low</span></td><td>blank_cell_between_values</td><td>P&amp;L Monthly</td><td>G9</td><td>Research &amp; Development</td><td>Jun</td><td>Blank cell found between non-empty cells in the same row.</td><td>This may affect the reliability of the financial report.</td><td>Check whether this blank cell should contain a value or formula.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>variance_spike_between_periods</td><td>P&amp;L Monthly</td><td>J10</td><td>Selling, General &amp; Administrative</td><td>Sep</td><td>Value changed by more than 50% compared with the previous period.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this period-over-period movement is expected and properly explained.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>variance_spike_between_periods</td><td>P&amp;L Monthly</td><td>K10</td><td>Selling, General &amp; Administrative</td><td>Oct</td><td>Value changed by more than 50% compared with the previous period.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this period-over-period movement is expected and properly explained.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>formula_inconsistency_in_row</td><td>P&amp;L Monthly</td><td>K12</td><td>Operating Income</td><td>Oct</td><td>Formula pattern differs from neighboring formulas in the same row.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this formula should match the copied pattern used nearby.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>variance_spike_between_periods</td><td>OPEX Detail</td><td>J8</td><td>Other G&amp;A</td><td>Sep</td><td>Value changed by more than 50% compared with the previous period.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this period-over-period movement is expected and properly explained.</td></tr>
+<tr><td><span class="badge medium">medium</span></td><td>variance_spike_between_periods</td><td>OPEX Detail</td><td>K8</td><td>Other G&amp;A</td><td>Oct</td><td>Value changed by more than 50% compared with the previous period.</td><td>This may affect the reliability of the financial report.</td><td>Review whether this period-over-period movement is expected and properly explained.</td></tr>
+<tr><td><span class="badge high">high</span></td><td>total_formula_mismatch</td><td>OPEX Detail</td><td>F9</td><td>Total OPEX Detail</td><td>May</td><td>Total formula may not include all expected detail rows.</td><td>This may affect operating expense analysis.</td><td>Review whether the total formula includes all relevant detail rows for this period.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

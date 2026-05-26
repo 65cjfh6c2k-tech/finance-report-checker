@@ -278,6 +278,30 @@
       font-weight: 800;
     }
 
+    .sample-downloads {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .sample-downloads h3 {
+      margin-bottom: 8px;
+      color: var(--navy);
+    }
+
+    .sample-download-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sample-download-actions .button-link,
+    .sample-download-actions .download-button {
+      min-height: 36px;
+      padding: 0 11px;
+      font-size: 13px;
+    }
+
     section {
       margin-top: 24px;
     }
@@ -774,6 +798,14 @@
           <p>OPEX Detail · F9 · May</p>
         </div>
         <div class="preview-output">Checked Excel with highlighted cells, comments, and QA_Report</div>
+        <div class="sample-downloads">
+          <h3>View sample output</h3>
+          <div class="sample-download-actions">
+            <a class="download-button primary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download sample checked Excel</a>
+            <a class="download-button secondary" href="/demo/sample_report.html" target="_blank" rel="noopener">View sample HTML report</a>
+            <a class="download-button secondary" href="/demo/sample_report.json" download="sample_report.json">Download sample JSON</a>
+          </div>
+        </div>
       </aside>
     </header>
 
