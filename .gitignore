@@ -8,3 +8,4 @@ report.json
 report.html
 checked_*.xlsx
 ~$*.xlsx
+milestone_*_backup/
