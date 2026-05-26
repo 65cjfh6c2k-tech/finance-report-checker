@@ -334,6 +334,12 @@
       border-radius: 6px;
     }
 
+    input[type="file"]:disabled {
+      background: var(--muted-panel);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
     .pill-row,
     .compact-grid,
     .output-grid {
@@ -720,16 +726,16 @@
         <div class="upload-copy">
           <span class="eyebrow">Local demo</span>
           <h2>Run a finance QA check</h2>
-          <p>Upload an .xlsx workbook to generate a risk score, issue list, and checked Excel output.</p>
-          <p class="upload-note">For public testing, use sample or anonymized workbooks.</p>
+          <p>In local/private demo mode, upload an .xlsx workbook to generate a risk score, issue list, and checked Excel output.</p>
+          <p class="upload-note">Local demo: files are processed on your machine while running the app locally.</p>
         </div>
-        <div class="public-note">Public page note: file upload works only in local/private demo mode when the backend is running. For hosted beta access, request an invite.</div>
-        <div class="security-warning">Do not upload confidential workbooks to any public demo environment.</div>
+        <div class="public-note">Public landing mode: file upload is available only in local/private demo when the backend is running.</div>
+        <div class="security-warning">For testing access, request private beta instead of uploading confidential files here.</div>
         <div class="upload-beta-action">
-          <a class="button-link secondary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
+          <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
         </div>
-        <input id="fileInput" type="file" accept=".xlsx">
-        <button id="analyzeButton" type="button">Analyze</button>
+        <input id="fileInput" type="file" accept=".xlsx" disabled>
+        <button id="analyzeButton" type="button" disabled>Analyze</button>
       </div>
     </section>
 
@@ -821,17 +827,33 @@
 
   <script>
     const API_URL = "http://127.0.0.1:8000/analyze";
+    // Set to false for local/private demos when the backend is running.
+    const PUBLIC_LANDING_MODE = true;
     const fileInput = document.getElementById("fileInput");
     const analyzeButton = document.getElementById("analyzeButton");
     const statusArea = document.getElementById("status");
     const resultsArea = document.getElementById("results");
     const emptyState = document.getElementById("emptyState");
 
+    if (PUBLIC_LANDING_MODE) {
+      fileInput.disabled = true;
+      analyzeButton.disabled = true;
+    } else {
+      fileInput.disabled = false;
+      analyzeButton.disabled = false;
+    }
+
     analyzeButton.addEventListener("click", analyzeFile);
 
     async function analyzeFile() {
-      const file = fileInput.files[0];
       clearPage();
+
+      if (PUBLIC_LANDING_MODE) {
+        showError("Public landing mode: file upload is available only in local/private demo when the backend is running.");
+        return;
+      }
+
+      const file = fileInput.files[0];
 
       if (!file) {
         showError("Choose an .xlsx file first.");
