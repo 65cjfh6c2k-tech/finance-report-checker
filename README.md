@@ -1,72 +1,80 @@
 # Finance Report Checker
 
-Finance Report Checker is a local MVP for reviewing Excel finance reports. It analyzes `.xlsx` workbooks, detects common spreadsheet QA issues, and produces reports that finance and operations teams can review.
+Finance Report Checker is a pre-send QA tool for Excel-based finance reports. It helps finance teams detect spreadsheet issues before reports reach management, clients, investors, or board audiences.
 
-The current version runs locally and uses deterministic rules. It does not send files to any external service.
+The project currently has a public landing page for validation and a separate local/private app for real workbook analysis.
 
 ## Product Positioning
 
-Finance Report Checker is a pre-send QA tool for Excel-based finance reports.
+Finance Report Checker is designed for FP&A analysts, finance managers, controllers, CFOs, and finance consultants who prepare or review Excel reporting packs.
 
-It is designed for FP&A analysts, finance managers, controllers, CFOs, and consultants who prepare or review Excel-based reporting packs.
+Core pain: finance professionals often spend time manually checking Excel reports and still risk sending files with broken formulas, manual overrides, missing values, unusual variances, or incorrect totals.
 
-Finance professionals often spend time manually checking Excel reports and still risk sending files with broken formulas, manual overrides, missing values, or incorrect totals.
+## Architecture
 
-Current pitch: Upload your workbook, run finance QA checks, and download an annotated Excel file with highlighted issues, comments, and a QA_Report sheet.
+### Public Landing
 
-## Current MVP Features
+`frontend/index.html` is the public Vercel landing page. It is a compact product page with sample output downloads, a Tally private beta request CTA, and Vercel Analytics.
 
-- Command-line analyzer through `analyzer.py`
-- FastAPI backend through `app.py`
-- Static browser frontend through `frontend/index.html`
-- Local startup script through `run_local.sh`
-- Excel upload and analysis from the browser
-- JSON report output
-- HTML report output
-- Checked Excel output with highlighted issue cells
-- Excel comments/notes on detected issue cells
-- `QA_Report` worksheet inside the checked Excel file
-- Download links for generated outputs in the frontend
+Public upload is intentionally disabled for security reasons.
 
-## Project Structure
+### Local/Private App
+
+`frontend/app.html` is the local/private analysis app. It runs at:
 
 ```text
-.
-├── analyzer.py                         # Core workbook analysis and report generation
-├── app.py                              # FastAPI backend
-├── frontend/
-│   └── index.html                      # Static frontend
-├── run_local.sh                        # Starts backend and frontend locally
-├── requirements.txt                    # Python dependencies
-├── sample_files/
-│   ├── sample_budget_actual.xlsx
-│   └── sample_budget_actual_variance_spike.xlsx
-├── report.json                         # Generated JSON report
-├── report.html                         # Generated HTML report
-└── checked_<workbook_name>.xlsx         # Generated annotated Excel output
+http://127.0.0.1:3000/app.html
 ```
 
-## How To Run Locally
+It uploads `.xlsx` files to the local FastAPI backend, displays QA results, renders charts, and can optionally request local AI executive insights.
 
-Start both the backend and frontend with:
+### FastAPI Backend
 
-```bash
-./run_local.sh
-```
-
-Then open:
-
-```text
-http://127.0.0.1:3000
-```
-
-The backend runs at:
+`app.py` runs at:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Press `Ctrl+C` in the terminal to stop both servers.
+It accepts workbook uploads, runs the analyzer, generates downloadable outputs, and returns the JSON report to the local app.
+
+### Analyzer Package
+
+The `finance_checker/` package contains the core logic:
+
+- workbook orchestration
+- issue detection rules
+- risk scoring
+- report generation
+- checked Excel output
+- deterministic chart specs
+- optional AI executive insights
+
+## How To Run Local/Private App
+
+Install dependencies in your virtual environment:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the backend and frontend:
+
+```bash
+./run_local.sh
+```
+
+Open the local/private app:
+
+```text
+http://127.0.0.1:3000/app.html
+```
+
+The public landing page remains available at:
+
+```text
+http://127.0.0.1:3000
+```
 
 ## Manual Startup
 
@@ -76,83 +84,123 @@ Start the backend:
 .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Start the frontend in a second terminal:
+Start the frontend in another terminal:
 
 ```bash
 cd frontend
 python -m http.server 3000 --bind 127.0.0.1
 ```
 
-Then open:
+## Public Landing Page
+
+The public landing page is:
 
 ```text
-http://127.0.0.1:3000
+frontend/index.html
 ```
+
+It is intended for public validation and beta collection:
+
+- deployed on Vercel
+- compact one-page product landing page
+- sample checked Excel, HTML, and JSON report downloads
+- Tally private beta request form
+- Vercel Analytics
+- no public upload
+
+## Local AI Insights With Ollama
+
+AI Executive Insights are optional and intended for the local/private app.
+
+The default local AI provider is Ollama. Recommended model:
+
+```bash
+ollama pull qwen2.5:7b
+```
+
+Create a `.env` file in the project root:
+
+```env
+AI_INSIGHTS_ENABLED=true
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:7b
+```
+
+Then run the local app and check `Generate AI insights with local AI` before analyzing a workbook.
+
+AI insights use a sanitized report summary only. The full Excel workbook is not sent to the model.
+
+Do not commit `.env`.
 
 ## How To Test
 
-Run the CLI analyzer with the basic sample workbook:
+Run the CLI analyzer:
 
 ```bash
 python analyzer.py sample_files/sample_budget_actual.xlsx
+python analyzer.py sample_files/sample_budget_actual_variance_spike.xlsx
+python analyzer.py sample_files/sample_finance_report_large.xlsx
 ```
 
-Run the CLI analyzer with the variance spike sample workbook:
+Run the local app:
 
 ```bash
-python analyzer.py sample_files/sample_budget_actual_variance_spike.xlsx
+./run_local.sh
 ```
 
-You can also test through the browser by starting the app with `./run_local.sh`, opening `http://127.0.0.1:3000`, and uploading either sample workbook.
+Then open:
+
+```text
+http://127.0.0.1:3000/app.html
+```
+
+Upload `sample_files/sample_finance_report_large.xlsx` to test issues, charts, downloads, and optional AI insights.
 
 ## Detected Issue Types
 
-### `hardcoded_value_among_formulas`
-
-Flags a numeric constant in a row that mostly contains formulas. This can indicate that a copied formula was overwritten with a hardcoded value.
-
-### `blank_cell_between_values`
-
-Flags a blank cell between non-empty cells in the same row. This can indicate a missing value or missing formula in a financial schedule.
-
-### `formula_inconsistency_in_row`
-
-Flags a formula that does not match the neighboring formula pattern in the same row. This can indicate a formula copy or reference error.
-
-### `variance_spike_between_periods`
-
-Flags a numeric period-over-period change greater than 50% between adjacent reporting periods. This can indicate an unusual movement that should be reviewed or explained.
+- `formula_inconsistency_in_row`: formula pattern differs from neighboring formulas.
+- `hardcoded_value_among_formulas`: numeric constant appears in a row mostly made of formulas.
+- `blank_cell_between_values`: blank cell appears between non-empty cells in a financial row.
+- `variance_spike_between_periods`: adjacent monthly values change by more than the configured threshold.
+- `total_formula_mismatch`: total/subtotal formula may omit expected detail rows.
 
 ## Generated Outputs
 
-### `report.json`
+The local/private app and CLI can generate:
 
-A machine-readable JSON report containing workbook metadata, sheet statistics, detected issues, issue counts, risk score, risk level, and executive summary.
+- browser summary
+- risk score
+- issue counts
+- issue table
+- deterministic finance charts
+- AI Executive Insights, if enabled
+- `report.html`
+- `report.json`
+- `checked_<workbook_name>.xlsx`
 
-### `report.html`
+The checked Excel workbook includes highlighted issue cells, Excel comments, and a `QA_Report` worksheet.
 
-A readable HTML report for quick review in a browser. It includes the workbook summary, risk score, issue counts, sheet statistics, and issue details.
+## Security Notes
 
-### `checked_<workbook_name>.xlsx`
-
-An annotated copy of the source workbook. It includes:
-
-- Highlighted issue cells
-- Excel comments/notes on issue cells
-- A `QA_Report` worksheet with workbook summary, sheet statistics, and issue details
+- Public upload is intentionally disabled.
+- Sensitive workbooks should be tested locally or in a private beta environment.
+- Local AI with Ollama avoids sending data to external AI APIs.
+- AI insights use sanitized issue, risk, and chart summaries rather than the full workbook.
+- Hosted upload requires further security hardening, including authentication, file isolation, retention controls, and secure storage policies.
 
 ## Current Limitations
 
-- Only `.xlsx` files are supported
-- Rules are deterministic only
-- No authentication yet
-- No file isolation per user yet
-- Not production-ready
+- Only `.xlsx` files are supported.
+- Core QA checks are deterministic rules.
+- Local AI output depends on the configured local model.
+- No authentication or multi-user file isolation yet.
+- Not production-ready.
 
-## Next Roadmap
+## Roadmap
 
-- Better finance-specific checks
-- Multi-file and session-specific outputs
-- Improved UI
-- Deployment
-- AI-generated explanations later
+- Hosted beta backend with security hardening.
+- Better AI prompts and management-ready explanations.
+- More finance-specific checks.
+- Multi-file/session output handling.
+- Excel add-in or local desktop packaging later.
