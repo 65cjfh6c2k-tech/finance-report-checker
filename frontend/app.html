@@ -267,7 +267,7 @@
     }
 
     .results-summary {
-      grid-template-columns: 1.35fr repeat(2, minmax(190px, 0.65fr));
+      grid-template-columns: 1.35fr repeat(3, minmax(160px, 0.65fr));
       align-items: stretch;
     }
 
@@ -344,6 +344,85 @@
       border-color: #D7C7AD;
     }
 
+    .result-actions {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      background: var(--muted-panel);
+      border-color: #D7C7AD;
+    }
+
+    .primary-actions,
+    .secondary-actions,
+    .memo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .secondary-actions {
+      gap: 8px;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .action-link:hover {
+      background: var(--sand);
+    }
+
+    .issues-panel {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .issues-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .issues-header h2 {
+      margin-bottom: 4px;
+    }
+
+    .issues-helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .issues-toggle {
+      flex: 0 0 auto;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--navy);
+      box-shadow: none;
+    }
+
+    .issues-toggle:hover:not(:disabled) {
+      background: var(--sand);
+      color: var(--navy);
+    }
+
     .charts-grid {
       display: grid;
       gap: 14px;
@@ -373,6 +452,67 @@
       margin: 0;
       color: var(--muted);
       background: var(--muted-panel);
+    }
+
+    .memo-panel {
+      padding: 26px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 18px 48px rgba(24, 33, 47, 0.08);
+    }
+
+    .memo-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .memo-header h2 {
+      margin-bottom: 6px;
+      font-size: 28px;
+    }
+
+    .memo-kicker {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .memo-section {
+      margin-top: 20px;
+    }
+
+    .memo-section h3 {
+      margin-bottom: 8px;
+      color: var(--navy);
+      font-size: 17px;
+    }
+
+    .memo-body {
+      padding: 0;
+      margin: 0;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .memo-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text);
+    }
+
+    .memo-list li {
+      margin-bottom: 8px;
+    }
+
+    .memo-list li:last-child {
+      margin-bottom: 0;
     }
 
     .ai-grid {
@@ -524,8 +664,17 @@
         grid-template-columns: 1fr;
       }
 
+      .memo-header {
+        display: grid;
+      }
+
+      .issues-header {
+        display: grid;
+      }
+
       button,
-      .download-button {
+      .download-button,
+      .action-link {
         width: 100%;
       }
     }
@@ -542,7 +691,7 @@
       <div class="intro-panel panel">
         <span class="eyebrow">Local / Private Analysis</span>
         <h1>Analyze an Excel finance report</h1>
-        <p>Upload an .xlsx workbook to generate a QA review, risk score, charts, downloadable reports, and a checked Excel file with comments.</p>
+        <p>Upload an .xlsx workbook to generate a QA review, risk score, management memo, downloadable reports, and a checked Excel file with comments.</p>
       </div>
 
       <div class="upload-panel panel">
@@ -559,7 +708,7 @@
     </header>
 
     <div id="status" class="status"></div>
-    <div id="emptyState" class="empty-state">Upload a workbook to see risk score, issue counts, charts, downloads, and detected issues here.</div>
+    <div id="emptyState" class="empty-state">Upload a workbook to see risk score, issue counts, downloads, management memo, and detected issues here.</div>
     <div id="results" class="hidden"></div>
   </div>
 
@@ -634,11 +783,13 @@
       emptyState.className = "hidden";
       resultsArea.className = "";
       const riskClass = riskLevelClass(report.risk_level);
+      const totalIssues = totalIssueCount(report.issue_counts);
       resultsArea.innerHTML = `
         <div class="summary-grid results-summary">
           ${summaryCard("Workbook", report.workbook)}
           ${riskScoreCard(report.risk_score, riskClass)}
           ${summaryCard("Risk Level", report.risk_level, riskClass)}
+          ${summaryCard("Issues Found", totalIssues)}
         </div>
 
         <section>
@@ -646,22 +797,25 @@
           <p class="panel summary-text">${escapeHtml(report.executive_summary)}</p>
         </section>
 
-        <section>
-          <h2>Issue Counts</h2>
+        ${renderActionPanel(report)}
+        ${renderManagementMemo(report.ai_insights, report.charts || [], report.downloads)}
+
+        <section id="issues-table" class="issues-panel">
+          <div class="issues-header">
+            <div>
+              <h2>Issues</h2>
+              <p class="issues-helper">Issue counts stay visible. Expand the table when you need the full QA detail.</p>
+            </div>
+            <button id="issuesToggleButton" class="issues-toggle" type="button" aria-controls="issuesTableContent" aria-expanded="false">
+              View issues table
+            </button>
+          </div>
           <div class="summary-grid">
             ${countCard("High", report.issue_counts?.high || 0, "high")}
             ${countCard("Medium", report.issue_counts?.medium || 0, "medium")}
             ${countCard("Low", report.issue_counts?.low || 0, "low")}
           </div>
-        </section>
-
-        ${renderDownloads(report.downloads)}
-        ${renderCharts(report.charts || [])}
-        ${renderAiInsights(report.ai_insights)}
-
-        <section>
-          <h2>Issues</h2>
-          <div class="table-wrap">
+          <div id="issuesTableContent" class="table-wrap hidden">
             <table>
               <thead>
                 <tr>
@@ -683,39 +837,149 @@
           </div>
         </section>
       `;
-      renderPlotlyCharts(report.charts || []);
+      setupIssuesToggle();
+      renderMemoCharts(report.ai_insights, report.charts || []);
     }
 
-    function renderDownloads(downloads) {
-      if (!downloads) {
-        return "";
-      }
+    function renderActionPanel(report) {
+      const downloads = report.downloads || {};
+      const hasMemo = hasEnabledMemo(report.ai_insights);
+
+      const memoAction = hasMemo
+        ? `<a class="download-button primary" href="#management-memo">View Management Memo</a>`
+        : "";
 
       return `
-        <section id="downloads">
-          <h2>Output package</h2>
-          <div class="panel download-actions">
+        <section class="panel result-actions" id="result-actions">
+          <div class="primary-actions">
+            ${memoAction}
             ${downloadLink("Download Checked Excel", downloads.checked_excel, "primary")}
+          </div>
+          ${hasMemo ? "" : `<p class="ai-note">Management Memo requires local AI. Start Ollama and enable AI insights.</p>`}
+          <div class="secondary-actions">
+            <a class="action-link" href="#issues-table" data-open-issues="true">View issues table</a>
             ${downloadLink("Download HTML Report", downloads.html_report, "secondary")}
             ${downloadLink("Download JSON Report", downloads.json_report, "secondary")}
+            ${downloadLink("Download Management Memo", downloads.management_memo_md, "secondary")}
           </div>
         </section>
       `;
     }
 
-    function renderCharts(charts) {
-      if (!charts || charts.length === 0) {
+    function renderManagementMemo(aiInsights, charts, downloads) {
+      if (!hasEnabledMemo(aiInsights)) {
+        return "";
+      }
+
+      const memo = normalizeManagementMemo(aiInsights);
+      const supportingCharts = getSupportingCharts(memo, charts);
+
+      return `
+        <section id="management-memo" class="memo-panel">
+          <div class="memo-header">
+            <div>
+              <span class="eyebrow">AI assisted</span>
+              <h2>Management Memo</h2>
+              <p class="memo-kicker">Prepared from the sanitized QA report. No full workbook contents are sent to AI.</p>
+            </div>
+            <div class="memo-actions">
+              ${downloadLink("Download Management Memo", downloads?.management_memo_md, "secondary")}
+            </div>
+          </div>
+          ${memoParagraph("Executive Summary", memo.executive_summary)}
+          ${memoList("Key Movements", memo.key_movements)}
+          ${memoList("Data Quality Risks", memo.data_quality_risks)}
+          ${memoList("Recommended Actions", memo.recommended_actions)}
+          ${memoParagraph("Draft Note for Management", memo.draft_note_for_management)}
+          ${renderSupportingCharts(supportingCharts)}
+        </section>
+      `;
+    }
+
+    function normalizeManagementMemo(aiInsights) {
+      const memo = aiInsights.management_memo || {};
+      return {
+        executive_summary: memo.executive_summary || aiInsights.executive_summary || "",
+        key_movements: memo.key_movements || [],
+        data_quality_risks: memo.data_quality_risks || [],
+        recommended_actions: memo.recommended_actions || [],
+        draft_note_for_management: memo.draft_note_for_management || aiInsights.management_note || "",
+        supporting_charts: memo.supporting_charts || []
+      };
+    }
+
+    function hasEnabledMemo(aiInsights) {
+      if (!aiInsights || !aiInsights.enabled) {
+        return false;
+      }
+
+      const memo = normalizeManagementMemo(aiInsights);
+      return Boolean(
+        memo.executive_summary ||
+        memo.key_movements.length ||
+        memo.data_quality_risks.length ||
+        memo.recommended_actions.length ||
+        memo.draft_note_for_management
+      );
+    }
+
+    function memoParagraph(title, text) {
+      if (!text) {
         return "";
       }
 
       return `
-        <section id="charts">
-          <h2>Charts</h2>
+        <section class="memo-section">
+          <h3>${escapeHtml(title)}</h3>
+          <p class="memo-body">${escapeHtml(text)}</p>
+        </section>
+      `;
+    }
+
+    function memoList(title, items) {
+      if (!items || items.length === 0) {
+        return "";
+      }
+
+      return `
+        <section class="memo-section">
+          <h3>${escapeHtml(title)}</h3>
+          <ul class="memo-list">
+            ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </section>
+      `;
+    }
+
+    function getSupportingCharts(memo, charts) {
+      if (!memo.supporting_charts || !charts || charts.length === 0) {
+        return [];
+      }
+
+      return memo.supporting_charts
+        .map((selection) => {
+          const chart = charts.find((candidate) => candidate.title === selection.chart_title);
+          if (!chart) {
+            return null;
+          }
+          return { chart, reason: selection.reason || chart.insight || "" };
+        })
+        .filter(Boolean);
+    }
+
+    function renderSupportingCharts(supportingCharts) {
+      if (!supportingCharts || supportingCharts.length === 0) {
+        return "";
+      }
+
+      return `
+        <section id="memo-supporting-charts" class="memo-section">
+          <h3>Supporting charts</h3>
           <div class="charts-grid">
-            ${charts.map((chart, index) => `
+            ${supportingCharts.map((item, index) => `
               <div class="chart-card">
-                <div id="chart-${index}" class="chart-container"></div>
-                <p class="chart-insight">${escapeHtml(chart.insight)}</p>
+                <div id="memo-chart-${index}" class="chart-container"></div>
+                <p class="chart-insight">${escapeHtml(item.reason)}</p>
               </div>
             `).join("")}
           </div>
@@ -723,50 +987,53 @@
       `;
     }
 
-    function renderAiInsights(aiInsights) {
-      if (!aiInsights) {
-        return "";
+    function renderMemoCharts(aiInsights, charts) {
+      if (!hasEnabledMemo(aiInsights)) {
+        return;
       }
 
-      if (!aiInsights.enabled) {
-        return `
-          <section id="ai-insights">
-            <h2>AI Executive Insights</h2>
-            <p class="panel ai-note">AI insights are not enabled for this local run.</p>
-          </section>
-        `;
-      }
-
-      return `
-        <section id="ai-insights">
-          <h2>AI Executive Insights</h2>
-          <p class="panel summary-text">${escapeHtml(aiInsights.executive_summary)}</p>
-          <div class="ai-grid">
-            ${(aiInsights.key_insights || []).map((insight) => `
-              <article class="ai-card">
-                <span class="badge ${escapeHtml(insight.severity)}">${escapeHtml(insight.severity)}</span>
-                <h3>${escapeHtml(insight.title)}</h3>
-                <p>${escapeHtml(insight.explanation)}</p>
-                <p><strong>Recommended action:</strong> ${escapeHtml(insight.recommended_action)}</p>
-              </article>
-            `).join("")}
-          </div>
-          <section>
-            <h3>Management Note</h3>
-            <p class="panel summary-text">${escapeHtml(aiInsights.management_note)}</p>
-          </section>
-        </section>
-      `;
+      const memo = normalizeManagementMemo(aiInsights);
+      const supportingCharts = getSupportingCharts(memo, charts);
+      renderPlotlyCharts(
+        supportingCharts.map((item) => item.chart),
+        "memo-chart"
+      );
     }
 
-    function renderPlotlyCharts(charts) {
+    function setupIssuesToggle() {
+      const toggleButton = document.getElementById("issuesToggleButton");
+      const tableContent = document.getElementById("issuesTableContent");
+      const openIssuesLinks = document.querySelectorAll("[data-open-issues='true']");
+
+      if (!toggleButton || !tableContent) {
+        return;
+      }
+
+      const setExpanded = (expanded) => {
+        tableContent.className = expanded ? "table-wrap" : "table-wrap hidden";
+        toggleButton.textContent = expanded ? "Hide issues table" : "View issues table";
+        toggleButton.setAttribute("aria-expanded", expanded ? "true" : "false");
+      };
+
+      toggleButton.addEventListener("click", () => {
+        setExpanded(tableContent.classList.contains("hidden"));
+      });
+
+      openIssuesLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          setExpanded(true);
+        });
+      });
+    }
+
+    function renderPlotlyCharts(charts, elementPrefix) {
       if (!charts || charts.length === 0) {
         return;
       }
 
       loadPlotly().then(() => {
         charts.forEach((chart, index) => {
-          const element = document.getElementById(`chart-${index}`);
+          const element = document.getElementById(`${elementPrefix}-${index}`);
           if (!element || !window.Plotly) {
             return;
           }
@@ -866,6 +1133,14 @@
           <div class="value"><span class="badge ${severity}">${escapeHtml(value)}</span></div>
         </div>
       `;
+    }
+
+    function totalIssueCount(issueCounts) {
+      return (
+        Number(issueCounts?.high || 0) +
+        Number(issueCounts?.medium || 0) +
+        Number(issueCounts?.low || 0)
+      );
     }
 
     function renderIssueRows(issues) {
