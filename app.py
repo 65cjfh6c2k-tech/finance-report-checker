@@ -1,5 +1,7 @@
 import os
 import re
+import shutil
+import time
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -16,6 +18,7 @@ RUNTIME_DIR = PROJECT_ROOT / "runtime"
 JOBS_DIR = RUNTIME_DIR / "jobs"
 DOWNLOAD_BASE_URL = "http://127.0.0.1:8000/download"
 DEFAULT_MAX_UPLOAD_MB = 10
+DEFAULT_JOB_TTL_MINUTES = 60
 
 app = FastAPI(title="Finance Report Checker API")
 
@@ -51,6 +54,7 @@ def build_download_urls(job_id: str, checked_filename: str) -> dict:
 @app.post("/analyze")
 async def analyze_upload(file: UploadFile = File(...), include_ai: bool = False):
     print(f"include_ai: {include_ai}")
+    cleanup_old_jobs()
 
     original_filename = Path(file.filename or "").name
     safe_filename = sanitize_workbook_filename(original_filename)
@@ -144,6 +148,43 @@ def max_upload_bytes() -> int:
     except ValueError:
         max_mb = DEFAULT_MAX_UPLOAD_MB
     return int(max_mb * 1024 * 1024)
+
+
+def job_ttl_seconds() -> float:
+    raw_value = os.getenv("JOB_TTL_MINUTES", str(DEFAULT_JOB_TTL_MINUTES))
+    try:
+        ttl_minutes = float(raw_value)
+    except ValueError:
+        ttl_minutes = DEFAULT_JOB_TTL_MINUTES
+    return max(ttl_minutes, 0) * 60
+
+
+def cleanup_old_jobs():
+    if not JOBS_DIR.exists():
+        return
+
+    jobs_root = JOBS_DIR.resolve()
+    cutoff = time.time() - job_ttl_seconds()
+
+    for job_dir in JOBS_DIR.iterdir():
+        try:
+            if not job_dir.is_dir() or not is_valid_job_id(job_dir.name):
+                continue
+
+            resolved_job_dir = job_dir.resolve()
+            if resolved_job_dir.parent != jobs_root:
+                continue
+
+            if job_dir.stat().st_mtime > cutoff:
+                continue
+
+            shutil.rmtree(resolved_job_dir)
+            print(f"Cleaned expired job folder: {job_dir.name}")
+        except Exception as error:
+            print(
+                "Warning: could not clean expired job folder "
+                f"{job_dir.name}: {error.__class__.__name__}"
+            )
 
 
 def enforce_upload_size(upload_bytes: bytes):
