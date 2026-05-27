@@ -16,14 +16,24 @@ DISABLED_AI_INSIGHTS = {
     "executive_summary": "",
     "key_insights": [],
     "management_note": "",
+    "management_memo": {},
     "error": "AI insights disabled or API key missing.",
 }
+
+MEMO_FIELDS = [
+    ("executive_summary", "Executive Summary"),
+    ("key_movements", "Key Movements"),
+    ("data_quality_risks", "Data Quality Risks"),
+    ("recommended_actions", "Recommended Actions"),
+    ("draft_note_for_management", "Draft Note for Management"),
+]
 
 LOCAL_AI_UNAVAILABLE = {
     "enabled": False,
     "executive_summary": "",
     "key_insights": [],
     "management_note": "",
+    "management_memo": {},
     "error": "Local AI is not available. Start Ollama and check the configured model.",
 }
 
@@ -32,6 +42,7 @@ LOCAL_AI_INVALID_JSON = {
     "executive_summary": "",
     "key_insights": [],
     "management_note": "",
+    "management_memo": {},
     "error": "Local AI returned an invalid JSON response.",
 }
 
@@ -66,6 +77,7 @@ def build_ai_context(report: dict) -> dict:
             {
                 "title": chart.get("title"),
                 "insight": chart.get("insight"),
+                "x_labels": chart.get("x", []),
                 "series_names": [
                     series.get("name") for series in chart.get("series", [])
                 ],
@@ -135,8 +147,26 @@ def generate_ollama_insights(report):
                     '      "recommended_action": "What to review or fix."\n'
                     "    }\n"
                     "  ],\n"
-                    '  "management_note": "Short note the user could adapt before sending report."\n'
+                    '  "management_note": "Short note the user could adapt before sending report.",\n'
+                    '  "management_memo": {\n'
+                    '    "executive_summary": "2-3 specific sentences for management.",\n'
+                    '    "key_movements": ["2-4 bullets about notable movements."],\n'
+                    '    "data_quality_risks": ["2-4 bullets about report quality risks."],\n'
+                    '    "recommended_actions": ["2-4 concrete actions before sending."],\n'
+                    '    "draft_note_for_management": "One concise paragraph the finance user can copy.",\n'
+                    '    "supporting_charts": [\n'
+                    "      {\n"
+                    '        "chart_title": "Exact chart title from sanitized context.",\n'
+                    '        "reason": "Why this chart supports a management-relevant insight."\n'
+                    "      }\n"
+                    "    ]\n"
+                    "  }\n"
                     "}\n\n"
+                    "Select supporting_charts only when a chart supports a "
+                    "management-relevant movement, risk, or recommended action. "
+                    "If no chart is useful, return an empty supporting_charts array. "
+                    "Avoid generic phrases. Reference specific sheet, cell, metric, "
+                    "and period values where available.\n\n"
                     "Sanitized AI context:\n"
                     f"{json.dumps(build_ai_context(report), indent=2)}"
                 ),
@@ -202,7 +232,7 @@ def generate_openai_insights(report):
                 },
                 {
                     "role": "user",
-                    "content": json.dumps(build_ai_context(report), indent=2),
+                    "content": build_ai_prompt(report),
                 },
             ],
             text={
@@ -226,6 +256,26 @@ def ai_insights_enabled(raw_value=None):
         load_dotenv(dotenv_path=DOTENV_PATH, override=True)
         raw_value = os.getenv("AI_INSIGHTS_ENABLED", "")
     return raw_value.strip().lower() in ENABLED_VALUES
+
+
+def build_ai_prompt(report):
+    return (
+        "Use only the sanitized AI context below. Do not infer from unavailable "
+        "workbook cells.\n\n"
+        "Return a finance-facing JSON response with executive insights and a "
+        "management_memo. The memo executive_summary should be 2-3 specific "
+        "sentences. The key_movements, data_quality_risks, and "
+        "recommended_actions arrays should each contain 2-4 useful bullets when "
+        "the context supports them. The draft_note_for_management should be one "
+        "concise paragraph that can be copied to management. Avoid generic "
+        "phrases. Reference specific sheet, cell, metric, and period values "
+        "where available. In management_memo.supporting_charts, select only "
+        "charts that support a management-relevant movement, risk, or "
+        "recommended action. If no chart is useful, return an empty "
+        "supporting_charts array.\n\n"
+        "Sanitized AI context:\n"
+        f"{json.dumps(build_ai_context(report), indent=2)}"
+    )
 
 
 def disabled_ai_insights(error_message=None):
@@ -289,6 +339,7 @@ def ai_insights_schema():
             "executive_summary",
             "key_insights",
             "management_note",
+            "management_memo",
         ],
         "properties": {
             "enabled": {"type": "boolean"},
@@ -316,6 +367,46 @@ def ai_insights_schema():
                 },
             },
             "management_note": {"type": "string"},
+            "management_memo": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "executive_summary",
+                    "key_movements",
+                    "data_quality_risks",
+                    "recommended_actions",
+                    "draft_note_for_management",
+                    "supporting_charts",
+                ],
+                "properties": {
+                    "executive_summary": {"type": "string"},
+                    "key_movements": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "data_quality_risks": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "recommended_actions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "draft_note_for_management": {"type": "string"},
+                    "supporting_charts": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["chart_title", "reason"],
+                            "properties": {
+                                "chart_title": {"type": "string"},
+                                "reason": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+            },
         },
     }
 
@@ -341,4 +432,61 @@ def normalize_ai_insights(insights):
         "executive_summary": str(insights.get("executive_summary", "")),
         "key_insights": key_insights,
         "management_note": str(insights.get("management_note", "")),
+        "management_memo": normalize_management_memo(insights),
     }
+
+
+def normalize_management_memo(insights):
+    memo = insights.get("management_memo") or {}
+    supporting_charts = []
+    for chart in memo.get("supporting_charts", []):
+        supporting_charts.append(
+            {
+                "chart_title": str(chart.get("chart_title", "")),
+                "reason": str(chart.get("reason", "")),
+            }
+        )
+
+    return {
+        "executive_summary": str(
+            memo.get("executive_summary") or insights.get("executive_summary", "")
+        ),
+        "key_movements": stringify_list(memo.get("key_movements", [])),
+        "data_quality_risks": stringify_list(memo.get("data_quality_risks", [])),
+        "recommended_actions": stringify_list(memo.get("recommended_actions", [])),
+        "draft_note_for_management": str(
+            memo.get("draft_note_for_management") or insights.get("management_note", "")
+        ),
+        "supporting_charts": supporting_charts,
+    }
+
+
+def stringify_list(values):
+    return [str(value) for value in values if value is not None]
+
+
+def has_management_memo(ai_insights):
+    if not ai_insights or not ai_insights.get("enabled"):
+        return False
+
+    memo = ai_insights.get("management_memo") or {}
+    return any(memo.get(field) for field, _label in MEMO_FIELDS)
+
+
+def render_management_memo_markdown(ai_insights):
+    memo = (ai_insights or {}).get("management_memo") or {}
+    lines = ["# Management Memo", ""]
+
+    for field, label in MEMO_FIELDS:
+        value = memo.get(field)
+        lines.extend([f"## {label}", ""])
+        if isinstance(value, list):
+            if value:
+                lines.extend([f"- {item}" for item in value])
+            else:
+                lines.append("No specific items identified.")
+        else:
+            lines.append(str(value or "No specific items identified."))
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"

@@ -9,7 +9,11 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from finance_checker.ai_insights import generate_ai_insights
+from finance_checker.ai_insights import (
+    generate_ai_insights,
+    has_management_memo,
+    render_management_memo_markdown,
+)
 from finance_checker import analyze_workbook, save_report_outputs
 
 
@@ -88,6 +92,15 @@ async def analyze_upload(file: UploadFile = File(...), include_ai: bool = False)
         report["downloads"] = build_download_urls(job_id, checked_filename)
         if include_ai:
             report["ai_insights"] = generate_ai_insights(report)
+            if has_management_memo(report["ai_insights"]):
+                memo_path = job_dir / "management_memo.md"
+                memo_path.write_text(
+                    render_management_memo_markdown(report["ai_insights"]),
+                    encoding="utf-8",
+                )
+                report["downloads"][
+                    "management_memo_md"
+                ] = f"{DOWNLOAD_BASE_URL}/{job_id}/management_memo.md"
 
         save_report_outputs(
             upload_path,
@@ -113,7 +126,11 @@ def download_file(job_id: str, filename: str):
         )
 
     safe_filename = Path(filename).name
-    is_allowed_report = safe_filename in {"report.html", "report.json"}
+    is_allowed_report = safe_filename in {
+        "report.html",
+        "report.json",
+        "management_memo.md",
+    }
     is_allowed_workbook = (
         safe_filename.startswith("checked_") and safe_filename.endswith(".xlsx")
     )
