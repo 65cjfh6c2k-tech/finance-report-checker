@@ -388,6 +388,7 @@
     .sample-downloads {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 9px;
       margin-top: 16px;
       padding-top: 16px;
@@ -399,6 +400,21 @@
       padding: 0 12px;
       font-size: 13px;
       box-shadow: none;
+    }
+
+    .sample-output-links {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .sample-output-links a {
+      color: var(--accent-dark);
+      text-decoration: none;
+    }
+
+    .sample-output-links a:hover {
+      text-decoration: underline;
     }
 
     .trust-strip {
@@ -677,6 +693,10 @@
         flex-direction: column;
       }
 
+      .sample-downloads {
+        align-items: stretch;
+      }
+
       .button-link,
       .download-button {
         width: 100%;
@@ -724,8 +744,7 @@
         <p class="description">Review formulas, hardcoded values, blank cells, variance spikes, and total formulas before a workbook goes out.</p>
         <div class="hero-actions">
           <a class="button-link primary" href="https://tally.so/r/jakX0a?utm_source=website&utm_medium=landing&utm_campaign=beta_launch" target="_blank" rel="noopener">Request beta access</a>
-          <a class="button-link secondary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download sample checked Excel</a>
-          <a class="text-link" href="/demo/sample_report.html" target="_blank" rel="noopener">View sample report</a>
+          <a class="text-link" href="#sample-result">View sample output</a>
         </div>
       </header>
 
@@ -781,8 +800,11 @@
           </div>
           <div class="sample-downloads">
             <a class="download-button primary" href="/demo/sample_checked_excel.xlsx" download="sample_checked_excel.xlsx">Download checked Excel</a>
-            <a class="download-button secondary" href="/demo/sample_report.html" target="_blank" rel="noopener">View HTML report</a>
-            <a class="download-button secondary" href="/demo/sample_report.json" download="sample_report.json">Download JSON</a>
+            <span class="sample-output-links">
+              <a href="/demo/sample_report.html" target="_blank" rel="noopener">View HTML report</a>
+              ·
+              <a href="/demo/sample_report.json" download="sample_report.json">Download JSON</a>
+            </span>
           </div>
         </div>
       </section>
