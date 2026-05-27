@@ -1,4 +1,7 @@
+import os
+import re
 from pathlib import Path
+from uuid import UUID, uuid4
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,8 +12,10 @@ from finance_checker import analyze_workbook, save_report_outputs
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-UPLOADS_DIR = PROJECT_ROOT / "uploads"
+RUNTIME_DIR = PROJECT_ROOT / "runtime"
+JOBS_DIR = RUNTIME_DIR / "jobs"
 DOWNLOAD_BASE_URL = "http://127.0.0.1:8000/download"
+DEFAULT_MAX_UPLOAD_MB = 10
 
 app = FastAPI(title="Finance Report Checker API")
 
@@ -35,11 +40,11 @@ def read_root():
     }
 
 
-def build_download_urls(workbook_filename: str) -> dict:
+def build_download_urls(job_id: str, checked_filename: str) -> dict:
     return {
-        "html_report": f"{DOWNLOAD_BASE_URL}/report.html",
-        "json_report": f"{DOWNLOAD_BASE_URL}/report.json",
-        "checked_excel": f"{DOWNLOAD_BASE_URL}/checked_{workbook_filename}",
+        "html_report": f"{DOWNLOAD_BASE_URL}/{job_id}/report.html",
+        "json_report": f"{DOWNLOAD_BASE_URL}/{job_id}/report.json",
+        "checked_excel": f"{DOWNLOAD_BASE_URL}/{job_id}/{checked_filename}",
     }
 
 
@@ -47,35 +52,62 @@ def build_download_urls(workbook_filename: str) -> dict:
 async def analyze_upload(file: UploadFile = File(...), include_ai: bool = False):
     print(f"include_ai: {include_ai}")
 
-    filename = Path(file.filename or "").name
-    if not filename.lower().endswith(".xlsx"):
+    original_filename = Path(file.filename or "").name
+    safe_filename = sanitize_workbook_filename(original_filename)
+    if safe_filename is None:
         raise HTTPException(
             status_code=400,
             detail="Only .xlsx files are supported.",
         )
 
-    UPLOADS_DIR.mkdir(exist_ok=True)
-    upload_path = UPLOADS_DIR / filename
-    upload_path.write_bytes(await file.read())
+    job_id = str(uuid4())
+    job_dir = JOBS_DIR / job_id
+    job_dir.mkdir(parents=True, exist_ok=False)
+    upload_path = job_dir / "input.xlsx"
+    checked_filename = f"checked_{safe_filename}"
 
     try:
-        report = analyze_workbook(str(upload_path))
-        save_report_outputs(upload_path, report)
+        upload_bytes = await file.read()
+        enforce_upload_size(upload_bytes)
+        upload_path.write_bytes(upload_bytes)
+    except HTTPException:
+        raise
     except Exception as error:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not analyze workbook: {error}",
+            detail="Could not save uploaded workbook.",
         ) from error
 
-    report["downloads"] = build_download_urls(filename)
-    if include_ai:
-        report["ai_insights"] = generate_ai_insights(report)
+    try:
+        report = analyze_workbook(str(upload_path))
+        report["workbook"] = safe_filename
+        report["downloads"] = build_download_urls(job_id, checked_filename)
+        if include_ai:
+            report["ai_insights"] = generate_ai_insights(report)
+
+        save_report_outputs(
+            upload_path,
+            report,
+            output_dir=job_dir,
+            checked_filename=checked_filename,
+        )
+    except Exception as error:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not analyze workbook.",
+        ) from error
 
     return report
 
 
-@app.get("/download/{filename}")
-def download_file(filename: str):
+@app.get("/download/{job_id}/{filename}")
+def download_file(job_id: str, filename: str):
+    if not is_valid_job_id(job_id):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid download request.",
+        )
+
     safe_filename = Path(filename).name
     is_allowed_report = safe_filename in {"report.html", "report.json"}
     is_allowed_workbook = (
@@ -88,7 +120,14 @@ def download_file(filename: str):
             detail="This file is not available for download.",
         )
 
-    file_path = PROJECT_ROOT / safe_filename
+    job_dir = (JOBS_DIR / job_id).resolve()
+    file_path = (job_dir / safe_filename).resolve()
+    if job_dir not in file_path.parents:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid download request.",
+        )
+
     if not file_path.exists() or not file_path.is_file():
         raise HTTPException(
             status_code=404,
@@ -96,3 +135,39 @@ def download_file(filename: str):
         )
 
     return FileResponse(file_path, filename=safe_filename)
+
+
+def max_upload_bytes() -> int:
+    raw_value = os.getenv("MAX_UPLOAD_MB", str(DEFAULT_MAX_UPLOAD_MB))
+    try:
+        max_mb = float(raw_value)
+    except ValueError:
+        max_mb = DEFAULT_MAX_UPLOAD_MB
+    return int(max_mb * 1024 * 1024)
+
+
+def enforce_upload_size(upload_bytes: bytes):
+    if len(upload_bytes) > max_upload_bytes():
+        raise HTTPException(
+            status_code=413,
+            detail="Uploaded file is too large.",
+        )
+
+
+def sanitize_workbook_filename(filename: str):
+    original_name = Path(filename or "").name
+    if Path(original_name).suffix.lower() != ".xlsx":
+        return None
+
+    stem = Path(original_name).stem
+    safe_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-")
+    if not safe_stem:
+        safe_stem = "workbook"
+    return f"{safe_stem[:120]}.xlsx"
+
+
+def is_valid_job_id(job_id: str) -> bool:
+    try:
+        return str(UUID(job_id)) == job_id
+    except ValueError:
+        return False

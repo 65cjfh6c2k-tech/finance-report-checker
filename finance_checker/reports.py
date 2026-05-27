@@ -242,9 +242,16 @@ def render_html_report(report):
 """
 
 
-def save_report_outputs(file_path, report):
+def save_report_outputs(file_path, report, output_dir=None, checked_filename=None):
     workbook_path = Path(file_path)
+    output_dir = Path(output_dir) if output_dir is not None else PROJECT_ROOT
+    report_path = output_dir / "report.json"
+    html_report_path = output_dir / "report.html"
+    checked_filename = checked_filename or f"checked_{workbook_path.name}"
+    checked_path = output_dir / checked_filename
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     output = json.dumps(report, indent=2)
-    REPORT_PATH.write_text(output + "\n", encoding="utf-8")
-    HTML_REPORT_PATH.write_text(render_html_report(report), encoding="utf-8")
-    save_annotated_workbook(workbook_path, report)
+    report_path.write_text(output + "\n", encoding="utf-8")
+    html_report_path.write_text(render_html_report(report), encoding="utf-8")
+    save_annotated_workbook(workbook_path, report, checked_path)

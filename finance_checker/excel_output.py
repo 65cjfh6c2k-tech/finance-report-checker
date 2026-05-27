@@ -206,7 +206,7 @@ def set_qa_report_column_widths(sheet):
         sheet.column_dimensions[column_letter].width = width
 
 
-def save_annotated_workbook(workbook_path, report):
+def save_annotated_workbook(workbook_path, report, output_path=None):
     workbook_path = Path(workbook_path)
     workbook = load_workbook(workbook_path, data_only=False)
 
@@ -226,6 +226,6 @@ def save_annotated_workbook(workbook_path, report):
 
     add_qa_report_sheet(workbook, report)
 
-    checked_path = PROJECT_ROOT / f"checked_{workbook_path.name}"
+    checked_path = Path(output_path) if output_path is not None else PROJECT_ROOT / f"checked_{workbook_path.name}"
     workbook.save(checked_path)
     return checked_path

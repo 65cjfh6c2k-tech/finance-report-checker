@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 uploads/
 outputs/
+runtime/
 report.json
 report.html
 checked_*.xlsx
