@@ -133,6 +133,56 @@ AI insights use a sanitized report summary only. The full Excel workbook is not 
 
 Do not commit `.env`.
 
+## Starting Local AI With Ollama
+
+1. Install Ollama.
+2. Pull the recommended model:
+
+```bash
+ollama pull qwen2.5:7b
+```
+
+3. Start Ollama by opening the Ollama app or running:
+
+```bash
+ollama serve
+```
+
+4. Check that Ollama is available:
+
+```bash
+curl http://localhost:11434/api/tags
+```
+
+Confirm `qwen2.5:7b` appears in the response.
+
+Use this `.env` configuration:
+
+```env
+AI_INSIGHTS_ENABLED=true
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:7b
+```
+
+Start Finance Report Checker:
+
+```bash
+./run_local.sh
+```
+
+Open:
+
+```text
+http://127.0.0.1:3000/app.html
+```
+
+Check `Generate AI insights`.
+
+If AI insights do not appear, first check whether `curl http://localhost:11434/api/tags` works.
+
+Do not commit `.env`.
+
 ## How To Test
 
 Run the CLI analyzer:
