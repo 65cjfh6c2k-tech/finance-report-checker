@@ -122,7 +122,7 @@ def generate_ai_insights(report: dict) -> dict:
     is_enabled = ai_insights_enabled(enabled_raw)
     provider = os.getenv("AI_PROVIDER", DEFAULT_PROVIDER).strip().lower()
 
-    print(f"AI provider: {provider}")
+    print(f"AI_PROVIDER: {provider}")
     print(f"AI_INSIGHTS_ENABLED raw value: {enabled_raw!r}")
 
     if not is_enabled:
@@ -141,10 +141,17 @@ def generate_ai_insights(report: dict) -> dict:
 def generate_ollama_insights(report):
     base_url = os.getenv("OLLAMA_BASE_URL", DEFAULT_OLLAMA_BASE_URL).rstrip("/")
     model = os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL)
+    tags_url = f"{base_url}/api/tags"
+    chat_url = f"{base_url}/api/chat"
 
-    print(f"Ollama model: {model}")
-    print(f"Ollama base URL: {base_url}")
+    print(f"OLLAMA_MODEL: {model}")
+    print(f"OLLAMA_BASE_URL: {base_url}")
+    print(f"Ollama chat URL: {chat_url}")
     print("Ollama request started")
+
+    model_check = check_ollama_model(tags_url, model, base_url)
+    if model_check is not None:
+        return model_check
 
     payload = {
         "model": model,
@@ -167,7 +174,7 @@ def generate_ollama_insights(report):
 
     try:
         request = urllib.request.Request(
-            f"{base_url}/api/chat",
+            chat_url,
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": "application/json"},
             method="POST",
@@ -187,12 +194,57 @@ def generate_ollama_insights(report):
         print(f"Ollama response preview: {safe_response_preview(locals().get('content', ''))}")
         print(f"Ollama error: {error.__class__.__name__}: {error}")
         return dict(LOCAL_AI_INVALID_JSON)
+    except urllib.error.HTTPError as error:
+        print(f"Ollama HTTP status: {error.code}")
+        print(f"Ollama error: {error.__class__.__name__}: {error}")
+        return local_ai_error(
+            f"Local AI chat failed: {error.__class__.__name__}: {short_error(error)}"
+        )
     except (urllib.error.URLError, TimeoutError) as error:
         print(f"Ollama error: {error.__class__.__name__}: {error}")
-        return dict(LOCAL_AI_UNAVAILABLE)
+        return local_ai_error(
+            f"Local AI chat failed: {error.__class__.__name__}: {short_error(error)}"
+        )
     except Exception as error:
         print(f"Ollama error: {error.__class__.__name__}: {error}")
-        return dict(LOCAL_AI_UNAVAILABLE)
+        return local_ai_error(
+            f"Local AI chat failed: {error.__class__.__name__}: {short_error(error)}"
+        )
+
+
+def check_ollama_model(tags_url, model, base_url):
+    print(f"Ollama tags URL: {tags_url}")
+    try:
+        request = urllib.request.Request(tags_url, method="GET")
+        with urllib.request.urlopen(request, timeout=10) as response:
+            print(f"Ollama tags HTTP status: {response.status}")
+            tags_data = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        print(f"Ollama tags HTTP status: {error.code}")
+        print(f"Ollama tags error: {error.__class__.__name__}: {error}")
+        return local_ai_error(
+            f"Local AI is not available at {base_url}. Start Ollama or check OLLAMA_BASE_URL."
+        )
+    except (urllib.error.URLError, TimeoutError) as error:
+        print(f"Ollama tags error: {error.__class__.__name__}: {error}")
+        return local_ai_error(
+            f"Local AI is not available at {base_url}. Start Ollama or check OLLAMA_BASE_URL."
+        )
+    except Exception as error:
+        print(f"Ollama tags error: {error.__class__.__name__}: {error}")
+        return local_ai_error(
+            f"Local AI is not available at {base_url}. Start Ollama or check OLLAMA_BASE_URL."
+        )
+
+    models = tags_data.get("models", [])
+    model_names = {item.get("name") for item in models if item.get("name")}
+    print(f"Ollama configured model found: {model in model_names}")
+    if model not in model_names:
+        return local_ai_error(
+            "Local AI model not found. Pull the configured Ollama model."
+        )
+
+    return None
 
 
 def generate_openai_insights(report):
@@ -253,9 +305,11 @@ def build_ai_prompt(report):
     return (
         "You are writing as an FP&A manager preparing a management review note "
         "for a CFO or CEO.\n\n"
-        "Use only the sanitized QA context below. Do not infer from unavailable "
-        "workbook cells. Do not invent numbers, variances, sheets, cells, "
-        "metrics, or periods that are not present in the context. Write in a "
+        "Use only the sanitized QA context below. Never invent sheet names, "
+        "cells, metrics, periods, values, formulas, or issue locations. Use "
+        "only exact details provided in the sanitized context. If a field is "
+        "missing, omit it rather than guessing. Do not create cell references "
+        "from memory or by extrapolating nearby rows. Write in a "
         "management-ready finance voice: direct, specific, calm, and practical.\n\n"
         "Return valid JSON only. Do not use markdown inside JSON values except "
         "plain strings in arrays. Keep the existing JSON shape exactly:\n"
@@ -286,6 +340,9 @@ def build_ai_prompt(report):
         "  }\n"
         "}\n\n"
         "Management memo requirements:\n"
+        "- Factuality is more important than completeness. Every sheet, cell, "
+        "metric, period, value, and chart title you mention must appear exactly "
+        "in the sanitized context.\n"
         "- executive_summary must be 3-4 sentences. It must say whether the "
         "workbook is ready to send or requires review first. Mention risk_score "
         "and risk_level when available. If any high-severity issue exists, name "
@@ -298,25 +355,30 @@ def build_ai_prompt(report):
         "from the current extracted data.\" Then add the reason in the same "
         "string if supported by the context.\n"
         "- data_quality_risks must include 3-5 bullets, ordered by severity "
-        "with high severity first. Each bullet must reference specific sheet, "
-        "cell, metric, and period where available, and explain why it matters "
-        "financially.\n"
+        "with high severity first. For each bullet, use exact sheet/cell/"
+        "metric/period values from one issue object. Do not alter or invent "
+        "cell references. Explain why each issue matters financially.\n"
         "- recommended_actions must include 3-5 practical actions ordered by "
-        "priority. Avoid generic phrases such as \"ensure accuracy\", "
-        "\"review the report\", or \"check everything\". Use action wording like "
+        "priority. Use exact issue locations only. Avoid generic phrases such "
+        "as \"ensure accuracy\", \"review the report\", or \"check everything\". "
+        "Use action wording like "
         "\"Review OPEX Detail F9 for May and confirm the total includes all "
         "relevant detail rows.\"\n"
-        "- draft_note must be one polished, copy-ready paragraph "
-        "for a CFO or CEO. If high-risk issues exist, say the report should be "
-        "reviewed before final distribution, but do not sound alarmist. Do not "
-        "say \"attached report\" unless the context requires it.\n"
+        "- draft_note must be 2-3 polished, copy-ready sentences for a CFO or "
+        "CEO. If risk_level is high, say the report should be reviewed before "
+        "final distribution. Mention the top issue specifically using the exact "
+        "sheet/cell/metric/period from the context. Avoid vague phrases like "
+        "\"several data quality issues\" unless immediately followed by "
+        "specific examples. Do not sound alarmist. Do not say \"attached "
+        "report\" unless the context requires it.\n"
         "- Separate business movements from data quality issues.\n"
         "- Select supporting_charts only when the chart directly supports a "
-        "specific key movement or data quality risk stated in the memo. If a "
-        "chart is only generally contextual, not directly relevant, or not "
-        "impacted by the current high-priority issues, do not include it. If no "
-        "chart directly supports the memo, return an empty supporting_charts "
-        "array.\n\n"
+        "specific key movement or data quality risk stated in the memo. Do not "
+        "include charts as general context. Do not include Revenue / Sales "
+        "Trend unless the memo discusses a revenue movement. If a chart is only "
+        "generally contextual, not directly relevant, or not impacted by the "
+        "current high-priority issues, do not include it. If no chart directly "
+        "supports the memo, return an empty supporting_charts array.\n\n"
         "Sanitized AI context:\n"
         f"{json.dumps(build_ai_context(report), indent=2)}"
     )
@@ -327,6 +389,16 @@ def disabled_ai_insights(error_message=None):
     if error_message:
         insights["error"] = error_message
     return insights
+
+
+def local_ai_error(error_message):
+    insights = dict(LOCAL_AI_UNAVAILABLE)
+    insights["error"] = error_message
+    return insights
+
+
+def short_error(error):
+    return str(error).replace("\n", " ")[:240]
 
 
 def safe_response_preview(content):
