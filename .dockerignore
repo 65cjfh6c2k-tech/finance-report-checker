@@ -1,0 +1,15 @@
+.git
+.venv
+.env
+runtime
+__pycache__
+*.pyc
+.DS_Store
+node_modules
+uploads
+outputs
+report.json
+report.html
+checked_*.xlsx
+~$*.xlsx
+milestone_*_backup

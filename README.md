@@ -108,6 +108,38 @@ It is intended for public validation and beta collection:
 - Vercel Analytics
 - no public upload
 
+## Beget VPS Deployment
+
+The FastAPI backend can be deployed on a Beget VPS with Docker.
+
+1. Install Docker and Docker Compose on the VPS.
+2. Copy this repository to the server or clone it from GitHub.
+3. Create a deployment environment file:
+
+```bash
+cp .env.example .env
+```
+
+For hosted beta deployment, keep AI disabled unless a proper AI backend or GPU setup is configured:
+
+```env
+AI_INSIGHTS_ENABLED=false
+```
+
+4. Build and start the backend:
+
+```bash
+docker compose up -d --build
+```
+
+5. Check that the API is running:
+
+```bash
+curl http://localhost:8000/docs
+```
+
+Runtime upload/output files are stored under `runtime/jobs/` inside the container volume. Configure nginx, HTTPS/SSL, domain routing, upload limits, and any authentication separately before exposing the API publicly.
+
 ## Local AI Insights With Ollama
 
 AI Executive Insights are optional and intended for the local/private app.

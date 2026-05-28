@@ -1,0 +1,13 @@
+services:
+  finance-report-checker-api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - finance_report_checker_jobs:/app/runtime/jobs
+    restart: unless-stopped
+
+volumes:
+  finance_report_checker_jobs:
