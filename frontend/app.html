@@ -890,7 +890,7 @@
           ${memoList("Key Movements", memo.key_movements)}
           ${memoList("Data Quality Risks", memo.data_quality_risks)}
           ${memoList("Recommended Actions", memo.recommended_actions)}
-          ${memoParagraph("Draft Note for Management", memo.draft_note_for_management)}
+          ${memoParagraph("Draft Note for Management", memo.draft_note)}
           ${renderSupportingCharts(supportingCharts)}
         </section>
       `;
@@ -903,7 +903,7 @@
         key_movements: memo.key_movements || [],
         data_quality_risks: memo.data_quality_risks || [],
         recommended_actions: memo.recommended_actions || [],
-        draft_note_for_management: memo.draft_note_for_management || aiInsights.management_note || "",
+        draft_note: memo.draft_note || memo.draft_note_for_management || aiInsights.management_note || "",
         supporting_charts: memo.supporting_charts || []
       };
     }
@@ -919,7 +919,7 @@
         memo.key_movements.length ||
         memo.data_quality_risks.length ||
         memo.recommended_actions.length ||
-        memo.draft_note_for_management
+        memo.draft_note
       );
     }
 
